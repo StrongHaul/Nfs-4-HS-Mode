@@ -48,7 +48,10 @@ DRAW_ON_RETURN_ADDR = RUNTIME_BASE + 0xB0788
 DRAW_SKIP_REVERSE_ADDR = RUNTIME_BASE + 0xB07CC
 
 PLAYER_CAR_OBJ_PTR_ADDR = 0x80110D0C
-COP_REVERSE_MASK_EXCLUDE_FLAGS = 0x0220
+# 0x20 is too broad here: civilian racers can carry it too, which would make
+# their white reverse-light object fall back to stock gear-only behavior.
+COP_REVERSE_MASK_EXCLUDE_FLAGS = 0x0200
+LEGACY_COP_REVERSE_MASK_EXCLUDE_FLAGS = 0x0220
 
 # Reuse the private counter from the already-working player civilian double
 # blink hook, so the reverse objects follow the same on/off cadence.
@@ -235,7 +238,9 @@ def make_object_cave(base_addr: int = OBJECT_CAVE_ADDR) -> bytes:
     return blob + bytes(OBJECT_CAVE_LEN - len(blob))
 
 
-def make_draw_cave(*, exclude_cop_flags: bool = True) -> bytes:
+def make_draw_cave(
+    *, exclude_cop_flags: bool = True, exclude_flags: int = COP_REVERSE_MASK_EXCLUDE_FLAGS
+) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay slot already loaded the stock gear byte into v0.
         # Affect civilian models only. Police cars and copbots keep the
@@ -243,7 +248,7 @@ def make_draw_cave(*, exclude_cop_flags: bool = True) -> bytes:
         *(
             [
                 lw("t1", 0x0260, "s2"),
-                andi("t1", "t1", COP_REVERSE_MASK_EXCLUDE_FLAGS),
+                andi("t1", "t1", exclude_flags),
                 bne("t1", "zero", "stock"),
                 nop(),
             ]
@@ -317,6 +322,7 @@ def main() -> int:
     draw_stock_hook = pack([lbu("v0", 0x0442, "s2"), nop()])
     draw_patched_hook = pack([j(DRAW_CAVE_ADDR), lbu("v0", 0x0442, "s2")])
     draw_cave = make_draw_cave()
+    previous_draw_cave = make_draw_cave(exclude_flags=LEGACY_COP_REVERSE_MASK_EXCLUDE_FLAGS)
     legacy_draw_cave = make_draw_cave(exclude_cop_flags=False)
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
@@ -356,7 +362,12 @@ def main() -> int:
         raise SystemExit(f"unexpected DrawC reverse mask hook: {current_draw_hook.hex(' ')}")
 
     current_draw_cave = bytes(data[DRAW_CAVE_OFF : DRAW_CAVE_OFF + DRAW_CAVE_LEN])
-    if current_draw_cave not in {bytes(DRAW_CAVE_LEN), draw_cave, legacy_draw_cave}:
+    if current_draw_cave not in {
+        bytes(DRAW_CAVE_LEN),
+        draw_cave,
+        previous_draw_cave,
+        legacy_draw_cave,
+    }:
         raise SystemExit(
             f"DrawC cave is not empty/known at 0x{DRAW_CAVE_OFF:X}: {current_draw_cave[:16].hex(' ')}"
         )
