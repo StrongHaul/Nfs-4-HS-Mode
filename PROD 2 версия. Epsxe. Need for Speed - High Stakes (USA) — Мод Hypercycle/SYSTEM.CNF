@@ -1,0 +1,5 @@
+BOOT = cdrom:\SLUS_008.26;1
+TCB = 4
+EVENT = 10
+STACK = 801ffffc
+

@@ -1,0 +1,160 @@
+Personality,Info,
+
+FileSize,127,
+
+Verbose Mode ?,0,
+
+Power ,of trait,
+Symbol:,LOW,0
+Symbol:,LO,0
+Symbol:,Medium,1
+Symbol:,med,1
+Symbol:,high,2
+Symbol:,hi,2
+Symbol:,extreme,3
+
+
+=============================,,,
+Personality 0:,Nemesis,,
+,blocking Distance,high,"This is the distance the opponent needs to be in from of the opponent before he starts to block. lo means he will block when the car gets quite close, while extreme means the opponent will block while he is still way ahead"
+,cutoff distance,low,Tendency to cut the player off
+,lookahead,high,"How far ahead does the player look for traffic.. low means that he doesn't see cars till the last minute (meaning he might crash, or he might pull out just in time for you to hit the ""unseen"" traffic car.  exterme means he scans way ahead."
+,swervyNess,low,Tendency to swerve all over the road
+,braking,high,Braking ability
+,roadRage,low,"What is this guys tendency to completely loose it, and attack the player ?"
+,drivingSkill,high,How competent is this personality at driving? Affects the probability of fishtailing.
+,acceleration,med,"low means less than normal accelration, medium is ""per spec"" (equal to player car), high is faster, and extreme is, well, extreme"
+,wipeOutFreq,low,Frequency at which the car wipes out
+,corneringAbility,extreme,"How well does this personality handle corners,  low means that he looses control a lot around corners, takes it wide, does powerslides, etc, extreme means he always holds it throught the corners"
+,bestLineAbility,extreme,"how closely does the car follow the best line ? Low means a greater tendency to drive along the center line (unless it is avoiding stuff), extreme will try to follow it exactly, and medium is in between."
+,rearendtendency,low,"tendency to rear end the human when driving behind him low means never, extreme means every chance he gets (whenever he is close)"
+,aggression,low,"tendency to smack the player.  Low means never, high means whenever he gets a chance (ie. Whenever he is close)"
+,copCollisionFirmess,med,ability to recover from a collision with a human cop
+
+Personality 1:,Bullit,
+,blocking Distance,high
+,cutoff distance,high
+,lookahead,Low
+,swervyNess,med
+,braking,high
+,roadRage,med
+,drivingSkill,high
+,acceleration,med
+,wipeOutFreq,low
+,corneringAbility,high
+,bestLineAbility,high
+,rearendtendency,high
+,aggression,high
+,copCollisionFirmess,extreme
+
+Personality 2,Frost,
+,blocking Distance,med
+,cutoff distance,low
+,lookahead,med
+,swervyNess,med
+,braking,med
+,roadRage,low
+,drivingSkill,med
+,acceleration,med
+,wipeOutFreq,med
+,corneringAbility,med
+,bestLineAbility,high
+,rearendtendency,low
+,aggression,low
+,copCollisionFirmess,high
+
+Personality 3,Ranger,
+,blocking Distance,med
+,cutoff distance,High
+,lookahead,Low
+,swervyNess,High
+,braking,Low
+,roadRage,med
+,drivingSkill,med
+,acceleration,med
+,wipeOutFreq,High
+,corneringAbility,med
+,bestLineAbility,med
+,rearendtendency,med
+,aggression,med
+,copCollisionFirmess,high
+
+Personality 4,Chump,
+,blocking Distance,low
+,cutoff distance,low
+,lookahead,low
+,swervyNess,high
+,braking,low
+,roadRage,low
+,drivingSkill,low
+,acceleration,low
+,wipeOutFreq,high
+,corneringAbility,low
+,bestLineAbility,low
+,rearendtendency,med
+,aggression,med
+,copCollisionFirmess,med
+
+Personality 10,Cop 1,
+,blocking Distance,high
+,cutoff distance,med
+,lookahead,high
+,swervyNess,low
+,braking,high
+,roadRage,med
+,drivingSkill,high
+,acceleration,med
+,wipeOutFreq,low
+,corneringAbility,extreme
+,bestLineAbility,low
+,rearendtendency,low
+,aggression,low
+,copCollisionFirmess,extreme
+
+Personality 10,Cop 2,
+,blocking Distance,high
+,cutoff distance,med
+,lookahead,high
+,swervyNess,low
+,braking,high
+,roadRage,med
+,drivingSkill,high
+,acceleration,med
+,wipeOutFreq,low
+,corneringAbility,extreme
+,bestLineAbility,low
+,rearendtendency,low
+,aggression,low
+,copCollisionFirmess,extreme
+
+Personality 10,Cop 3,
+,blocking Distance,high
+,cutoff distance,med
+,lookahead,high
+,swervyNess,low
+,braking,high
+,roadRage,med
+,drivingSkill,high
+,acceleration,med
+,wipeOutFreq,low
+,corneringAbility,extreme
+,bestLineAbility,low
+,rearendtendency,low
+,aggression,low
+,copCollisionFirmess,extreme
+
+Personality 11,Traffic,
+,blocking Distance,low
+,cutoff distance,low
+,lookahead,med
+,swervyNess,high
+,braking,med
+,roadRage,low
+,drivingSkill,high
+,acceleration,med
+,wipeOutFreq,low
+,corneringAbility,extreme
+,bestLineAbility,low
+,rearendtendency,low
+,aggression,low
+,copCollisionFirmess,extreme

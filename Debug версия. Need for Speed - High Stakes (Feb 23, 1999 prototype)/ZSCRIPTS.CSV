@@ -1,0 +1,379 @@
+Script data...,,,,,,,,,,,,,,,,,,
+Filesize,505,,,,,,,,,,,,,,,,,
+
+Verbose,0,,,,,,,,,,,,,,,,,
+
+
+Symbol List:,,,,AI script reaction,,,,,,,,,use it,,,,,do not use
+,Symbol:,INIT,0,Do not use this,,,,,,,,,,,,,,
+,Symbol:,END,1,This is used to specify the end of a script,,,,,,,,,,,,,,
+,Symbol:,SPEED_BURST,2,"Burst of Speed.  Speed is reduced as necessary for obstacles, cars, etc..",,,,,,,,,sorta cool,,,,,
+,Symbol:,HONK_HORN,3,Simple horn,,,,,,,,,use sparingly,,,,,
+,Symbol:,HARD_BRAKE,4,(Simulates) braking hard by driving 1/2 as fast as it normally would,,,,,,,,,,,,,,freaky and unpredictable we probably do not want to use this
+,Symbol:,SWIPE,5,"If the opponent is beside the player, he will side swipe him",,,,,,,,,cool,,,,,
+,Symbol:,ATTACK,6,Full on psycho attack.,,,,,,,,,,,,,,unless you stop he just drives stupidly
+,Symbol:,PAUSE,7,Does nothing.. used to put pauses in script,,,,,,,,,does nothing,,,,,does nothing
+,Symbol:,REAR_END,8,"If the opponent is within 60 meters ""cone"" behind player he will burst speed and rear end",,,,,,,,,try ,,,,,
+,Symbol:,SWERVE,9,Swerves back and forth - may affect decision making too though (and hit stuff),,,,,,,,,,,,,,may hit stuff 
+,Symbol:,MOVE_AWAY,10,Moves out of the way of player,,,,,,,,,,,,,,why would he do this
+,Symbol:,WIPE_OUT,11,"AI looses a lot of grip and oversteers heavy, and eventually wipes out.",,,,,,,,,may look funny,,,,,
+,Symbol:,CRAZY_HORN,12,"This is the ""I'm really pissed off"" horn",,,,,,,,,cool,,,,,
+,Symbol:,DEBUG1,13,Debug purposes only,,,,,,,,,,,,,,
+,Symbol:,DEBUG2,14,Debug purposes only,,,,,,,,,,,,,,
+,Symbol:,DEBUG3,15,Debug purposes only,,,,,,,,,,,,,,
+,Symbol:,DEBUG4,16,Debug purposes only,,,,,,,,,,,,,,
+
+
+
+
+
+=======================,,,,,,,,,,,,,,,,,,
+Personality 0:,Nemesis,,,,,,,,,,,,,,,,,
+,Player Action,,Reaction,Time,,,,,,,,,,,,,,
+,Collision,,HONK_HORN,2
+,,,END,0
+,,,HONK_HORN,2
+,,,END,0
+
+,Opp wizzed by,,PAUSE,2
+,,,SWIPE,2
+,,,END,0
+,,,END,0
+
+,Human block opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,PAUSE,2
+,,,SWIPE,4
+,,,END,0
+,,,END,0
+
+,human honk,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+=======================,,,,
+Personality 1:,Blurrr,,,
+,Player Action,,Reaction,Time
+,Collision,,PAUSE,2
+,,,PAUSE,2
+,,,CRAZY_HORN,4
+,,,END,0
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,HONK_HORN,2
+,,,PAUSE,2
+,,,PAUSE,2
+,,,REAR_END,2
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,PAUSE,2
+,,,PAUSE,2
+,,,SWIPE,6
+,,,END,0
+
+,human honk,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+=======================,,,,
+Personality 2:,Zippy,,,
+,Player Action,,Reaction,Time
+,Collision,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,PAUSE,2
+,,,PAUSE,2
+,,,REAR_END,4
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human honk,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+=======================,,,,
+Personality 3:,JetBoy,,,
+,Player Action,,Reaction,Time
+,Collision,,PAUSE,2
+,,,SWIPE,4
+,,,END,0
+,,,END,0
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,REAR_END,4
+,,,PAUSE,2
+,,,HONK_HORN,2
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,HONK_HORN,2
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human honk,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+=======================,,,,
+Personality 4:,Menace,,,
+,Player Action,,Reaction,Time
+,Collision,,HONK_HORN,2
+,,,PAUSE,2
+,,,PAUSE,2
+,,,WIPE_OUT,8
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,PAUSE,0
+,,,PAUSE,0
+,,,PAUSE,0
+,,,HONK_HORN,2
+
+,human honk,,SWIPE,2
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+
+=======================,,,,
+Personality 10:,Cop1,,,
+,Player Action,,Reaction,Time
+,Collision,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human honk,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+=======================,,,,
+Personality 10:,Cop2,,,
+,Player Action,,Reaction,Time
+,Collision,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human honk,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+=======================,,,,
+Personality 10:,Cop3,,,
+,Player Action,,Reaction,Time
+,Collision,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human honk,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+
+=======================,,,,
+Personality 11:,Traffic,,,
+,Player Action,,Reaction,Time
+,Collision,,HONK_HORN,2
+,,,HONK_HORN,2
+,,,HONK_HORN,2
+,,,CRAZY_HORN,8
+
+,Opp wizzed by,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,Human block opp,,HONK_HORN,2
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp block human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,opp pass human,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human pass opp,,END,0
+,,,END,0
+,,,END,0
+,,,END,0
+
+,human honk,,HONK_HORN,2
+,,,END,0
+,,,END,0
+,,,END,0

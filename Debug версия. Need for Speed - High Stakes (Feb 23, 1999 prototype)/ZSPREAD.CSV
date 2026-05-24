@@ -1,0 +1,89 @@
+Spread File,Info,,,,
+
+FileSize,55,,,,
+
+Verbose Mode ?,1,,,,
+
+Symbol:,yes,1,,,
+Symbol:,no,0,,,
+Symbol:,end,-1,,,
+
+
+
+
+
+,,,One Full,,
+Track Times:,,Track #,Speed Lap (s),,Name of Track
+,Track,0,120
+,Track,1,120
+,Track,2,120
+,Track,3,120
+,Track,4,120
+,Track,5,120
+,Track,6,120
+,Track,7,120
+,Track,8,120
+,Track,9,120
+,Track,10,120
+, ,END,END
+
+
+Fixed Spread Table for Single Player Mode (all 1's),,,
+
+!FIXED,,
+,Personality,Spread Factor
+,Nemesis,1
+,Blurrr,1
+,Zippy,1
+,JetBoy,1
+,Menace,1
+
+Fixed Spread Table for KNOCKOUT MODE,,
+
+!FIXED,,
+,Personality,Spread Factor
+,Nemesis,1
+,Blurrr,1
+,Zippy,0.995
+,JetBoy,0.99
+,Menace,0.98,
+
+!INT,,,
+Number of Spread Tables:,,,3
+Use Interpolation ?:,,,YES
+
+====================,,,
+!INT,,,
+,Spread Table 0,,
+,Time (s),154,
+!FIXED,,,
+,Personality,Spread Factor,
+,Nemesis,1,
+,Blurrr,0.998,
+,Zippy,0.992,
+,JetBoy,0.976,
+,Menace,0.958
+
+====================,,
+!INT,,
+,Spread Table 1,
+,Time (s),1000
+!FIXED,,
+,Personality,Spread Factor
+,Nemesis,1
+,Blurrr,0.999
+,Zippy,0.997
+,JetBoy,0.99
+,Menace,0.983
+
+====================,,
+!INT,,
+,Spread Table 2,
+,Time (s),1800
+!FIXED,,
+,Personality,Spread Factor
+,Nemesis,1
+,Blurrr,1
+,Zippy,0.999
+,JetBoy,0.996
+,Menace,0.993

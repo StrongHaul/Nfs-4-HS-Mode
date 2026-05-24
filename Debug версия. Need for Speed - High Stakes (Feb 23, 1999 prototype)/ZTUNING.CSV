@@ -1,0 +1,81 @@
+"Caravan Details, and Single Race Multipliers ",,,,,,,,,,,
+
+FileSize,140,,,,,,,,,,
+
+Verbose Mode ?,0,,,,,,,,,,
+
+_+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++,,,,,,,,,,,
+
+Symbol:,N/A,0,,,,,,,Distance,,"The game tries to maintain a distance between the car in this slot and the car in front,… this distance is a random number between the minimum and maximum (below), and a new"
+,,,,,,,,,Change,_->,Random number in that range is chosen after a given time duration.  This number represents that time duration in seconds..
+,,,,,,,,,Time,,
+,Distance,Minimum,Maximum,Fall Back,,,,,,,
+,Change,Random ,Random ,Random,,,,,Minimum,,The game keeps the car in this slot a random distance away from the car in front of him.  This number represents
+Slot,Time,Distance,Distance,Freq (sec),,,,,Random ,_->,the minimum distance the random distance can be chosen as.
+_=================================================================,,,,,,,,,Distance,,
+A (leader),N/A,N/A,N/A,450,,,,,,,
+B,30,90,110,300,,,,,Maximum,,The game keeps the car in this slot a random distance away from the car in front of him.  This number represents
+C,30,180,200,300,,,,,Random ,_->,the maximum distance the random distance can be chosen as.
+D,30,180,200,250,,,,,Distance,,
+E,30,300,320,200,,,,,,,
+F (loser),30,450,470,N/A,,,,,Fall Back,,This number determines the average amount of time which will pass for the car in this slot
+,,,,,,,,,Random,_->,to fall back and exchange places with the car behind him.
+,,,,,,,,,Freq (sec),,
+_+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++,,,,,,,,,,,
+
+!FIXED,,,,,,,,,,,
+CarType,Beg. Mult,Adv. Mult,Exp. Mult,,,,,,,,
+_=================================================================,,,,,,,,,,,
+MSLK,0.8,0.975,1.03,,,,,,,,
+BMWZ,0.9,0.975,1.03,,,,,,,,
+HSVT,0.8,0.975,1.03,,,,,,,,
+FORD,0.8,0.975,1.03,,,,,,,,
+CMRO,0.8,0.975,1.03
+TRAM,0.8,0.975,1.03
+ADB7,0.8,0.975,1.03
+JXKR,0.8,0.975,1.03
+BMWM,0.8,0.975,1.03
+CORV,0.8,0.975,1.03
+F550,0.8,0.975,1.03
+P993,0.8,0.975,1.03
+F375,0.8,0.975,1.03
+DIAB,0.8,0.975,1.03
+MCLK,0.8,0.975,1.03
+MCF1,0.8,0.975,1.03
+X993,0.8,0.975,1.03
+X375,0.8,0.975,1.03
+XCF1,0.8,0.975,1.03
+BNS1,0.8,0.975,1.03
+BNS2,0.8,0.975,1.03,,,,,,,,,,,
+BNS3,0.8,0.975,1.03,,,,,,,,,,,
+
+
+TRACK MULTIPLIERS,,,,,,,,,,,,,,
+
+Track Number,,Track Name,,Overall Multiplier,,,Night Multipler,,,,,Overall multiplier,,This multiplier is applied to any car in any time of day basically ALL THE TIME
+0,,Snowy,,0.975,,,0.975,,,,,,,
+1,,Highway,,1,,,1,,,,,Night Multiplier:,,This is a uniform multiplier which is applied to every car when ever the time of day isn't day (ie. Dawn or night or anything not super bright)
+2,,Coastal,,1,,,1,,,,,,,
+3,,France,,1,,,1,,,,,,,
+4,,Park,,1,,,1,,,,,,,
+5,,Celtic,,1,,,1,,,,,,,
+6,,Germany,,1,,,1,,,,,,,
+7,,UK,,1,,,1,,,,,,,
+8,,GT1,,0.975,,,0.975,,,,,,,
+9,,GT2,,0.975,,,0.975,,
+10,,GT3,,0.975,,,0.975,,
+11,,Undefined,,1,,,1,,
+
+
+WEATHER MULTIPLIER,,,"This multiplier is applied according to what the curve is…there is no effect on straight stretches and maximum affect on curvy parts.. For example if your multiplier is 0.30 and the curve is 0 then the speed doesn't change at all, at a curve of 128 (half of the scale), then the speed is multiplied by 0.15, and if the curve is 256 (max) then the curve is multiplied by 0.30....get it ",,,,,,
+0.25,,,,,,,,,
+
+
+Upgrades…,,,,,,,,,
+
+,,,Acceleration ,,Brake,,Handling,,Top Speed
+,,,Multiplier,,Multiplier,,Multiplier,,Multiplier
+
+Engine Mods,,,1.1,,1.25,,1,,1.09
+WeightTransfer/suspension,,,0.98,,1,,1.05,,1
+Ground Effects/aero package,,,1.09,,1,,1.02,,1

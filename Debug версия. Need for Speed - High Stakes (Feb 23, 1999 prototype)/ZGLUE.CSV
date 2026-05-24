@@ -1,0 +1,29 @@
+Personality,Info,,,,,
+
+FileSize,22,,,,,
+
+Verbose Mode ?,0,,,,,
+
+
+!FIXED,,,,,,
+,1.25,,player 600m +,,,
+,1.25,,player 540m,,,
+,1.2,,player 480m ,,,Player is ahead
+,1.2,,player 420m ,,,
+,1.15,,player 360m,,,
+,1.15,,player 300m ,,,
+,1.1,,player 240m,,,
+,1.1,,player 180m,,,
+,1.05,,player 120m ,,,
+,1,,player 60 m,,,
+,1,,beside,,,Opponent is here.
+,1,,player 60 m,,,
+,0.98,,player 120m ,,,
+,0.96,,player 180m,,,
+,0.94,,player 240m,,,
+,0.92,,player 300m ,,,
+,0.9,,player 360m,,,Player is behind
+,0.88,,player 420m ,,,
+,0.86,,player 480m ,,,
+,0.84,,player 540m,,,
+,0.82,,player 600m -,,,
