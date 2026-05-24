@@ -25,15 +25,19 @@ VISIBLE_ADDR = 0x800B126C
 HIDDEN_ADDR = 0x800B1264
 GEAR_NONZERO_ADDR = 0x800B1184
 
-# Keep this outside the 0x800F7A00/0x800F7B00 cheat-controlled player-arrest
-# caves. The first reverse-light object build used 0xE8240, which sat inside
-# the player-bust candidate cave's reserved padding and made that cheat fragile.
-OBJECT_CAVE_OFF = 0xFF200
+# Keep this outside any executed delay slots of the 0x800F7A00/0x800F7B00
+# cheat-controlled player-arrest caves. 0xE8240 is the delay slot after the
+# candidate cave's final jump, and 0xFF200 proved unsafe for this hook.
+OBJECT_CAVE_OFF = 0xE8350
 OBJECT_CAVE_ADDR = RUNTIME_BASE + OBJECT_CAVE_OFF
-OBJECT_CAVE_LEN = 0xC0
+OBJECT_CAVE_LEN = 0xB0
 
 LEGACY_OBJECT_CAVE_OFF = 0xE8240
 LEGACY_OBJECT_CAVE_ADDR = RUNTIME_BASE + LEGACY_OBJECT_CAVE_OFF
+LEGACY_OBJECT_CAVE_LEN = 0xC0
+FAR_OBJECT_CAVE_OFF = 0xFF200
+FAR_OBJECT_CAVE_ADDR = RUNTIME_BASE + FAR_OBJECT_CAVE_OFF
+FAR_OBJECT_CAVE_LEN = 0xC0
 
 DRAW_CAVE_OFF = 0xE803C
 DRAW_CAVE_ADDR = RUNTIME_BASE + DRAW_CAVE_OFF
@@ -290,15 +294,26 @@ def main() -> int:
     object_stock_hook = pack([lbu("v0", 0x0442, "s5"), nop()])
     object_patched_hook = pack([j(OBJECT_CAVE_ADDR), lbu("v0", 0x0442, "s5")])
     object_legacy_hook = pack([j(LEGACY_OBJECT_CAVE_ADDR), lbu("v0", 0x0442, "s5")])
+    object_far_hook = pack([j(FAR_OBJECT_CAVE_ADDR), lbu("v0", 0x0442, "s5")])
     object_cave = make_object_cave()
-    object_legacy_cave = make_object_cave(LEGACY_OBJECT_CAVE_ADDR)
+    object_legacy_cave = make_object_cave(LEGACY_OBJECT_CAVE_ADDR) + bytes(
+        LEGACY_OBJECT_CAVE_LEN - OBJECT_CAVE_LEN
+    )
+    object_far_cave = make_object_cave(FAR_OBJECT_CAVE_ADDR) + bytes(
+        FAR_OBJECT_CAVE_LEN - OBJECT_CAVE_LEN
+    )
 
     draw_stock_hook = pack([lbu("v0", 0x0442, "s2"), nop()])
     draw_patched_hook = pack([j(DRAW_CAVE_ADDR), lbu("v0", 0x0442, "s2")])
     draw_cave = make_draw_cave()
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
-    if current_hook not in {object_stock_hook, object_patched_hook, object_legacy_hook}:
+    if current_hook not in {
+        object_stock_hook,
+        object_patched_hook,
+        object_legacy_hook,
+        object_far_hook,
+    }:
         raise SystemExit(f"unexpected reverse-light hook bytes: {current_hook.hex(' ')}")
 
     current_cave = bytes(data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN])
@@ -308,12 +323,19 @@ def main() -> int:
         )
 
     current_legacy_cave = bytes(
-        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + OBJECT_CAVE_LEN]
+        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN]
     )
-    if current_legacy_cave not in {bytes(OBJECT_CAVE_LEN), object_legacy_cave}:
+    if current_legacy_cave not in {bytes(LEGACY_OBJECT_CAVE_LEN), object_legacy_cave}:
         raise SystemExit(
             f"legacy object cave is not empty/known at 0x{LEGACY_OBJECT_CAVE_OFF:X}: "
             f"{current_legacy_cave[:16].hex(' ')}"
+        )
+
+    current_far_cave = bytes(data[FAR_OBJECT_CAVE_OFF : FAR_OBJECT_CAVE_OFF + FAR_OBJECT_CAVE_LEN])
+    if current_far_cave not in {bytes(FAR_OBJECT_CAVE_LEN), object_far_cave}:
+        raise SystemExit(
+            f"far object cave is not empty/known at 0x{FAR_OBJECT_CAVE_OFF:X}: "
+            f"{current_far_cave[:16].hex(' ')}"
         )
 
     current_draw_hook = bytes(data[DRAW_HOOK_OFF : DRAW_HOOK_OFF + 8])
@@ -329,15 +351,21 @@ def main() -> int:
     if args.revert:
         data[HOOK_OFF : HOOK_OFF + 8] = object_stock_hook
         data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = bytes(OBJECT_CAVE_LEN)
-        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = bytes(
-            OBJECT_CAVE_LEN
+        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN] = bytes(
+            LEGACY_OBJECT_CAVE_LEN
+        )
+        data[FAR_OBJECT_CAVE_OFF : FAR_OBJECT_CAVE_OFF + FAR_OBJECT_CAVE_LEN] = bytes(
+            FAR_OBJECT_CAVE_LEN
         )
         data[DRAW_HOOK_OFF : DRAW_HOOK_OFF + 8] = draw_stock_hook
         data[DRAW_CAVE_OFF : DRAW_CAVE_OFF + DRAW_CAVE_LEN] = bytes(DRAW_CAVE_LEN)
     else:
         data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = object_cave
-        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = bytes(
-            OBJECT_CAVE_LEN
+        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN] = bytes(
+            LEGACY_OBJECT_CAVE_LEN
+        )
+        data[FAR_OBJECT_CAVE_OFF : FAR_OBJECT_CAVE_OFF + FAR_OBJECT_CAVE_LEN] = bytes(
+            FAR_OBJECT_CAVE_LEN
         )
         data[HOOK_OFF : HOOK_OFF + 8] = object_patched_hook
         data[DRAW_CAVE_OFF : DRAW_CAVE_OFF + DRAW_CAVE_LEN] = draw_cave
