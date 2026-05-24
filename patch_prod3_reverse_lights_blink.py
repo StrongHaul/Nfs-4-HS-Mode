@@ -48,6 +48,7 @@ DRAW_ON_RETURN_ADDR = RUNTIME_BASE + 0xB0788
 DRAW_SKIP_REVERSE_ADDR = RUNTIME_BASE + 0xB07CC
 
 PLAYER_CAR_OBJ_PTR_ADDR = 0x80110D0C
+COP_REVERSE_MASK_EXCLUDE_FLAGS = 0x0220
 
 # Reuse the private counter from the already-working player civilian double
 # blink hook, so the reverse objects follow the same on/off cadence.
@@ -234,11 +235,21 @@ def make_object_cave(base_addr: int = OBJECT_CAVE_ADDR) -> bytes:
     return blob + bytes(OBJECT_CAVE_LEN - len(blob))
 
 
-def make_draw_cave() -> bytes:
+def make_draw_cave(*, exclude_cop_flags: bool = True) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay slot already loaded the stock gear byte into v0.
         # Affect civilian models only. Police cars and copbots keep the
         # original reverse-gear condition.
+        *(
+            [
+                lw("t1", 0x0260, "s2"),
+                andi("t1", "t1", COP_REVERSE_MASK_EXCLUDE_FLAGS),
+                bne("t1", "zero", "stock"),
+                nop(),
+            ]
+            if exclude_cop_flags
+            else []
+        ),
         lhu("t1", 0x08BC, "s2"),
         slti("t1", "t1", 0x16),
         beq("t1", "zero", "stock"),
@@ -306,6 +317,7 @@ def main() -> int:
     draw_stock_hook = pack([lbu("v0", 0x0442, "s2"), nop()])
     draw_patched_hook = pack([j(DRAW_CAVE_ADDR), lbu("v0", 0x0442, "s2")])
     draw_cave = make_draw_cave()
+    legacy_draw_cave = make_draw_cave(exclude_cop_flags=False)
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
     if current_hook not in {
@@ -325,9 +337,10 @@ def main() -> int:
     current_legacy_cave = bytes(
         data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN]
     )
-    if current_legacy_cave not in {bytes(LEGACY_OBJECT_CAVE_LEN), object_legacy_cave}:
+    legacy_object_cave_is_ours = current_legacy_cave == object_legacy_cave
+    if current_hook == object_legacy_hook and not legacy_object_cave_is_ours:
         raise SystemExit(
-            f"legacy object cave is not empty/known at 0x{LEGACY_OBJECT_CAVE_OFF:X}: "
+            f"legacy object hook points at non-object cave 0x{LEGACY_OBJECT_CAVE_OFF:X}: "
             f"{current_legacy_cave[:16].hex(' ')}"
         )
 
@@ -343,7 +356,7 @@ def main() -> int:
         raise SystemExit(f"unexpected DrawC reverse mask hook: {current_draw_hook.hex(' ')}")
 
     current_draw_cave = bytes(data[DRAW_CAVE_OFF : DRAW_CAVE_OFF + DRAW_CAVE_LEN])
-    if current_draw_cave not in {bytes(DRAW_CAVE_LEN), draw_cave}:
+    if current_draw_cave not in {bytes(DRAW_CAVE_LEN), draw_cave, legacy_draw_cave}:
         raise SystemExit(
             f"DrawC cave is not empty/known at 0x{DRAW_CAVE_OFF:X}: {current_draw_cave[:16].hex(' ')}"
         )
@@ -351,9 +364,10 @@ def main() -> int:
     if args.revert:
         data[HOOK_OFF : HOOK_OFF + 8] = object_stock_hook
         data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = bytes(OBJECT_CAVE_LEN)
-        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN] = bytes(
-            LEGACY_OBJECT_CAVE_LEN
-        )
+        if legacy_object_cave_is_ours:
+            data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN] = bytes(
+                LEGACY_OBJECT_CAVE_LEN
+            )
         data[FAR_OBJECT_CAVE_OFF : FAR_OBJECT_CAVE_OFF + FAR_OBJECT_CAVE_LEN] = bytes(
             FAR_OBJECT_CAVE_LEN
         )
@@ -361,9 +375,10 @@ def main() -> int:
         data[DRAW_CAVE_OFF : DRAW_CAVE_OFF + DRAW_CAVE_LEN] = bytes(DRAW_CAVE_LEN)
     else:
         data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = object_cave
-        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN] = bytes(
-            LEGACY_OBJECT_CAVE_LEN
-        )
+        if legacy_object_cave_is_ours:
+            data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + LEGACY_OBJECT_CAVE_LEN] = bytes(
+                LEGACY_OBJECT_CAVE_LEN
+            )
         data[FAR_OBJECT_CAVE_OFF : FAR_OBJECT_CAVE_OFF + FAR_OBJECT_CAVE_LEN] = bytes(
             FAR_OBJECT_CAVE_LEN
         )
