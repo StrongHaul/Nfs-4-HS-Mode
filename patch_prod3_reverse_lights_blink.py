@@ -25,10 +25,15 @@ VISIBLE_ADDR = 0x800B126C
 HIDDEN_ADDR = 0x800B1264
 GEAR_NONZERO_ADDR = 0x800B1184
 
-# Zeroed executable padding in the same loaded area as other stable PROD3 caves.
-OBJECT_CAVE_OFF = 0xE8240
+# Keep this outside the 0x800F7A00/0x800F7B00 cheat-controlled player-arrest
+# caves. The first reverse-light object build used 0xE8240, which sat inside
+# the player-bust candidate cave's reserved padding and made that cheat fragile.
+OBJECT_CAVE_OFF = 0xFF200
 OBJECT_CAVE_ADDR = RUNTIME_BASE + OBJECT_CAVE_OFF
 OBJECT_CAVE_LEN = 0xC0
+
+LEGACY_OBJECT_CAVE_OFF = 0xE8240
+LEGACY_OBJECT_CAVE_ADDR = RUNTIME_BASE + LEGACY_OBJECT_CAVE_OFF
 
 DRAW_CAVE_OFF = 0xE803C
 DRAW_CAVE_ADDR = RUNTIME_BASE + DRAW_CAVE_OFF
@@ -165,7 +170,7 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def make_object_cave() -> bytes:
+def make_object_cave(base_addr: int = OBJECT_CAVE_ADDR) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay slot already loaded the stock gear byte into v0.
         addiu("sp", "sp", -8),
@@ -219,7 +224,7 @@ def make_object_cave() -> bytes:
         j(GEAR_NONZERO_ADDR),
         addiu("v1", "s4", -6),
     ]
-    blob = pack_labeled(items, OBJECT_CAVE_ADDR)
+    blob = pack_labeled(items, base_addr)
     if len(blob) > OBJECT_CAVE_LEN:
         raise SystemExit(f"cave too large: 0x{len(blob):X}")
     return blob + bytes(OBJECT_CAVE_LEN - len(blob))
@@ -284,20 +289,31 @@ def main() -> int:
 
     object_stock_hook = pack([lbu("v0", 0x0442, "s5"), nop()])
     object_patched_hook = pack([j(OBJECT_CAVE_ADDR), lbu("v0", 0x0442, "s5")])
+    object_legacy_hook = pack([j(LEGACY_OBJECT_CAVE_ADDR), lbu("v0", 0x0442, "s5")])
     object_cave = make_object_cave()
+    object_legacy_cave = make_object_cave(LEGACY_OBJECT_CAVE_ADDR)
 
     draw_stock_hook = pack([lbu("v0", 0x0442, "s2"), nop()])
     draw_patched_hook = pack([j(DRAW_CAVE_ADDR), lbu("v0", 0x0442, "s2")])
     draw_cave = make_draw_cave()
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
-    if current_hook not in {object_stock_hook, object_patched_hook}:
+    if current_hook not in {object_stock_hook, object_patched_hook, object_legacy_hook}:
         raise SystemExit(f"unexpected reverse-light hook bytes: {current_hook.hex(' ')}")
 
     current_cave = bytes(data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN])
     if current_cave not in {bytes(OBJECT_CAVE_LEN), object_cave}:
         raise SystemExit(
             f"object cave is not empty/known at 0x{OBJECT_CAVE_OFF:X}: {current_cave[:16].hex(' ')}"
+        )
+
+    current_legacy_cave = bytes(
+        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + OBJECT_CAVE_LEN]
+    )
+    if current_legacy_cave not in {bytes(OBJECT_CAVE_LEN), object_legacy_cave}:
+        raise SystemExit(
+            f"legacy object cave is not empty/known at 0x{LEGACY_OBJECT_CAVE_OFF:X}: "
+            f"{current_legacy_cave[:16].hex(' ')}"
         )
 
     current_draw_hook = bytes(data[DRAW_HOOK_OFF : DRAW_HOOK_OFF + 8])
@@ -313,10 +329,16 @@ def main() -> int:
     if args.revert:
         data[HOOK_OFF : HOOK_OFF + 8] = object_stock_hook
         data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = bytes(OBJECT_CAVE_LEN)
+        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = bytes(
+            OBJECT_CAVE_LEN
+        )
         data[DRAW_HOOK_OFF : DRAW_HOOK_OFF + 8] = draw_stock_hook
         data[DRAW_CAVE_OFF : DRAW_CAVE_OFF + DRAW_CAVE_LEN] = bytes(DRAW_CAVE_LEN)
     else:
         data[OBJECT_CAVE_OFF : OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = object_cave
+        data[LEGACY_OBJECT_CAVE_OFF : LEGACY_OBJECT_CAVE_OFF + OBJECT_CAVE_LEN] = bytes(
+            OBJECT_CAVE_LEN
+        )
         data[HOOK_OFF : HOOK_OFF + 8] = object_patched_hook
         data[DRAW_CAVE_OFF : DRAW_CAVE_OFF + DRAW_CAVE_LEN] = draw_cave
         data[DRAW_HOOK_OFF : DRAW_HOOK_OFF + 8] = draw_patched_hook
