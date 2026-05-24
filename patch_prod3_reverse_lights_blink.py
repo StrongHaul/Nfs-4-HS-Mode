@@ -48,10 +48,14 @@ DRAW_ON_RETURN_ADDR = RUNTIME_BASE + 0xB0788
 DRAW_SKIP_REVERSE_ADDR = RUNTIME_BASE + 0xB07CC
 
 PLAYER_CAR_OBJ_PTR_ADDR = 0x80110D0C
-# 0x20 is too broad here: civilian racers can carry it too, which would make
-# their white reverse-light object fall back to stock gear-only behavior.
+# Legacy flag-based filters were too broad here: 0x20 can be set on civilian
+# racers, and 0x200 is set on the human/player car. Use carInfo->carType for
+# the live DrawC police check instead.
 COP_REVERSE_MASK_EXCLUDE_FLAGS = 0x0200
 LEGACY_COP_REVERSE_MASK_EXCLUDE_FLAGS = 0x0220
+CARINFO_OFF = 0x0288
+POLICE_CAR_TYPE_FIRST = 0x16
+POLICE_CAR_TYPE_COUNT = 0x06
 
 # Reuse the private counter from the already-working player civilian double
 # blink hook, so the reverse objects follow the same on/off cadence.
@@ -239,12 +243,29 @@ def make_object_cave(base_addr: int = OBJECT_CAVE_ADDR) -> bytes:
 
 
 def make_draw_cave(
-    *, exclude_cop_flags: bool = True, exclude_flags: int = COP_REVERSE_MASK_EXCLUDE_FLAGS
+    *,
+    police_carinfo_check: bool = True,
+    exclude_cop_flags: bool = False,
+    exclude_flags: int = COP_REVERSE_MASK_EXCLUDE_FLAGS,
 ) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay slot already loaded the stock gear byte into v0.
-        # Affect civilian models only. Police cars and copbots keep the
-        # original reverse-gear condition.
+        # Affect civilian models only. Police cars and copbots keep stock
+        # reverse-gear behavior.
+        *(
+            [
+                lw("t1", CARINFO_OFF, "s2"),
+                nop(),
+                lw("t1", 0, "t1"),
+                nop(),
+                addiu("t1", "t1", -POLICE_CAR_TYPE_FIRST),
+                sltiu("t1", "t1", POLICE_CAR_TYPE_COUNT),
+                bne("t1", "zero", "stock"),
+                nop(),
+            ]
+            if police_carinfo_check
+            else []
+        ),
         *(
             [
                 lw("t1", 0x0260, "s2"),
@@ -322,8 +343,15 @@ def main() -> int:
     draw_stock_hook = pack([lbu("v0", 0x0442, "s2"), nop()])
     draw_patched_hook = pack([j(DRAW_CAVE_ADDR), lbu("v0", 0x0442, "s2")])
     draw_cave = make_draw_cave()
-    previous_draw_cave = make_draw_cave(exclude_flags=LEGACY_COP_REVERSE_MASK_EXCLUDE_FLAGS)
-    legacy_draw_cave = make_draw_cave(exclude_cop_flags=False)
+    previous_draw_cave = make_draw_cave(
+        police_carinfo_check=False, exclude_cop_flags=True
+    )
+    legacy_flag_draw_cave = make_draw_cave(
+        police_carinfo_check=False,
+        exclude_cop_flags=True,
+        exclude_flags=LEGACY_COP_REVERSE_MASK_EXCLUDE_FLAGS,
+    )
+    legacy_draw_cave = make_draw_cave(police_carinfo_check=False, exclude_cop_flags=False)
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
     if current_hook not in {
@@ -366,6 +394,7 @@ def main() -> int:
         bytes(DRAW_CAVE_LEN),
         draw_cave,
         previous_draw_cave,
+        legacy_flag_draw_cave,
         legacy_draw_cave,
     }:
         raise SystemExit(
