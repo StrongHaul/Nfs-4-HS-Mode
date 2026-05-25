@@ -158,7 +158,7 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def make_post_cave(*, duplicate_hp_one_traffic: bool = True) -> bytes:
+def make_post_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         addiu("t0", "sp", 0x10),
         lui("t1", hi(FRONTEND_RACE_TYPE_ADDR)),
@@ -184,23 +184,6 @@ def make_post_cave(*, duplicate_hp_one_traffic: bool = True) -> bytes:
         addiu("t2", "zero", 3),
         sb("t2", 0x1AC, "t0"),
         "maybe_already_two",
-        *(
-            [
-                # HP night normally has exactly one traffic model. Duplicate
-                # that model in FRONT so the game stream and model list are
-                # consistent before NFS4.EXE sees it.
-                lhu("t2", 0x244, "t0"),
-                bne("t2", "t3", "traffic_cap_three"),
-                nop(),
-                lhu("t2", 0x246, "t0"),
-                sh("t2", 0x248, "t0"),
-                addiu("t2", "zero", 2),
-                sh("t2", 0x244, "t0"),
-            ]
-            if duplicate_hp_one_traffic
-            else []
-        ),
-        "traffic_cap_three",
         lhu("t2", 0x244, "t0"),
         addiu("t3", "zero", 3),
         bne("t2", "t3", "stock"),
@@ -261,9 +244,8 @@ def apply_patch(path: Path) -> None:
     if current_hook not in {POST_STOCK, hook}:
         raise SystemExit(f"unexpected hook bytes at 0x{POST_HOOK_OFF:X}: {current_hook.hex(' ')}")
     cave = make_post_cave()
-    previous_cave = make_post_cave(duplicate_hp_one_traffic=False)
     current_cave = bytes(data[POST_CAVE_OFF : POST_CAVE_OFF + POST_CAVE_LEN])
-    if current_cave not in {bytes(POST_CAVE_LEN), cave, previous_cave}:
+    if current_cave not in {bytes(POST_CAVE_LEN), cave}:
         raise SystemExit(f"cave at 0x{POST_CAVE_OFF:X} is not empty/ours")
     if ENABLE_UNSAFE_AI_MODEL_CHEAT:
         model_hook = pack([j(AI_MODEL_CAVE_ADDR), nop(), nop()])
@@ -321,7 +303,6 @@ def main() -> int:
 
     print(f"{action} {path}")
     print("HP Duel: add second AI racer without AI model hook")
-    print("HP night: duplicate one traffic model to make two FRONT traffic entries")
     print(f"md5 {md5(path)}")
     return 0
 
