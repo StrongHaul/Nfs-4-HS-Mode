@@ -254,11 +254,42 @@ def cave() -> bytes:
         nop(),
         beq("t4", "zero", "raceway_no_traffic_slots"),
         nop(),
-        "add_loop",
         # Existing-traffic HP/SR tracks already have valid traffic entries.
-        # Cloning them here can corrupt the HP composition in PROD3 with the
-        # two-racer frontend patch, turning the added slots into HSV racers.
-        # Keep this feature limited to no-traffic Raceway/GT setups below.
+        # PROD3 with two HP AI racers only has one free car slot, so do not use
+        # the old "clone to 3 traffic cars" behavior. Instead, only raise night
+        # variants with one traffic car to the normal two-traffic cap.
+        slti("t6", "t3", 2),
+        beq("t6", "zero", "done"),
+        nop(),
+        slti("t6", "t1", MAX_CARS),
+        beq("t6", "zero", "done"),
+        nop(),
+        sll("t6", "t1", 7),
+        sll("t7", "t1", 5),
+        addu("t6", "t6", "t7"),
+        sll("t7", "t1", 4),
+        addu("t6", "t6", "t7"),
+        sll("t7", "t1", 2),
+        addu("t6", "t6", "t7"),
+        addiu("t2", "t0", CAR_DATA_ARRAY_OFF),
+        addu("t2", "t2", "t6"),
+        addu("t8", "t4", "zero"),
+        addu("t9", "t2", "zero"),
+        addiu("t6", "zero", CAR_DATA_SIZE // 4),
+        "existing_traffic_copy",
+        lw("t7", 0x0000, "t8"),
+        addiu("t8", "t8", 4),
+        sw("t7", 0x0000, "t9"),
+        addiu("t9", "t9", 4),
+        addiu("t6", "t6", -1),
+        bne("t6", "zero", "existing_traffic_copy"),
+        nop(),
+        addiu("t6", "zero", TRAFFIC_FLAG),
+        sw("t6", CAR_FLAGS_OFF, "t2"),
+        addiu("t6", "zero", PERSONALITY_TRAFFIC),
+        sw("t6", PERSONALITY_OFF, "t2"),
+        addiu("t1", "t1", 1),
+        sw("t1", NUM_CARS_OFF, "t0"),
         beq("zero", "zero", "done"),
         nop(),
         "raceway_no_traffic_slots",
@@ -736,9 +767,10 @@ def main() -> int:
     print(f"hook runtime 0x{runtime(CARS_STARTUP_HOOK_OFF):08X} -> cave 0x{runtime(CAVE_OFF):08X}")
     print(f"enable cheat: 80054B7C 0001 (off: 80054B7C 0000)")
     print("Single Race pseudo-HP prehook reverted; stable traffic/Raceway hook active")
+    print("Existing-traffic HP/SR tracks: one night traffic car is raised to two")
     print("Raceway/GT: Hot Pursuit keeps 4 cops + 1 traffic; Single Race adds 1 traffic only")
     print("Hot Pursuit second AI racer wrapper disabled after load hang")
-    print("third traffic replacement only: 80114E18 00?? and 80118D98 00??")
+    print("Raceway appended traffic replacement: 80114E18 00?? and 80118D98 00??")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
