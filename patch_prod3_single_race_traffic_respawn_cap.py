@@ -26,7 +26,9 @@ ENABLE_ADDR = 0x80054B7C
 GAMESETUP_DATA_ADDR = 0x801144A4
 GAME_TYPE_OFF = 0x0000
 SINGLE_RACE_GAME_TYPE = 0
+HOT_PURSUIT_GAME_TYPE = 1
 MIN_SINGLE_RACE_TRAFFIC_CAP = 5
+MIN_HOT_PURSUIT_TRAFFIC_CAP = 2
 
 REG = {
     "zero": 0,
@@ -123,7 +125,32 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def cave() -> bytes:
+def cave(*, include_hot_pursuit: bool = True) -> bytes:
+    if not include_hot_pursuit:
+        items: list[int | str | tuple[str, str, str, str]] = [
+            # Legacy SR-only version.
+            lui("t0", hi(ENABLE_ADDR)),
+            lhu("t1", lo(ENABLE_ADDR), "t0"),
+            beq("t1", "zero", "finish"),
+            nop(),
+            lui("t0", hi(GAMESETUP_DATA_ADDR)),
+            addiu("t0", "t0", lo(GAMESETUP_DATA_ADDR)),
+            lw("t1", GAME_TYPE_OFF, "t0"),
+            bne("t1", "zero", "finish"),
+            nop(),
+            slti("t1", "v0", MIN_SINGLE_RACE_TRAFFIC_CAP),
+            beq("t1", "zero", "finish"),
+            nop(),
+            addiu("v0", "zero", MIN_SINGLE_RACE_TRAFFIC_CAP),
+            "finish",
+            j(RETURN_ADDR),
+            nop(),
+        ]
+        blob = pack_labeled(items, runtime(CAVE_OFF))
+        if len(blob) > CAVE_LEN:
+            raise SystemExit(f"legacy cave too large: 0x{len(blob):X} > 0x{CAVE_LEN:X}")
+        return blob.ljust(CAVE_LEN, b"\x00")
+
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay already executes stock: lw v0,0(v0).
         lui("t0", hi(ENABLE_ADDR)),
@@ -133,8 +160,26 @@ def cave() -> bytes:
         lui("t0", hi(GAMESETUP_DATA_ADDR)),
         addiu("t0", "t0", lo(GAMESETUP_DATA_ADDR)),
         lw("t1", GAME_TYPE_OFF, "t0"),
-        bne("t1", "zero", "finish"),
+        beq("t1", "zero", "single_race"),
         nop(),
+        *(
+            [
+                addiu("t1", "t1", -HOT_PURSUIT_GAME_TYPE),
+                bne("t1", "zero", "finish"),
+                nop(),
+                # Hot Pursuit + enabled traffic cheat: let the second night
+                # traffic car leave purgatory.
+                slti("t1", "v0", MIN_HOT_PURSUIT_TRAFFIC_CAP),
+                beq("t1", "zero", "finish"),
+                nop(),
+                addiu("v0", "zero", MIN_HOT_PURSUIT_TRAFFIC_CAP),
+                beq("zero", "zero", "finish"),
+                nop(),
+            ]
+            if include_hot_pursuit
+            else [bne("t1", "zero", "finish"), nop()]
+        ),
+        "single_race",
         # Single Race + enabled Raceway/traffic cheat: let roving traffic keep
         # up to the normal day cap even on night/dusk variants.
         slti("t1", "v0", MIN_SINGLE_RACE_TRAFFIC_CAP),
@@ -176,8 +221,9 @@ def main() -> int:
         raise SystemExit(f"unexpected hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     blob = cave()
+    previous_blob = cave(include_hot_pursuit=False)
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {b"\x00" * CAVE_LEN, blob}:
+    if current_cave not in {b"\x00" * CAVE_LEN, blob, previous_blob}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}: {current_cave[:16].hex(' ')}")
 
     if args.revert:
@@ -195,6 +241,7 @@ def main() -> int:
 
     print(("reverted" if args.revert else "patched"), exe)
     print("Single Race + 80054B7C: traffic release cap minimum = 5")
+    print("Hot Pursuit + 80054B7C: traffic release cap minimum = 2")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
