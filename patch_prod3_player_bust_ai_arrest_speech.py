@@ -15,11 +15,12 @@ RUNTIME_BASE = 0x8000F800
 #   addiu v0,zero,1
 #   sw    v0,0x80(s0)   ; hudActivated_ = 1
 #
-# The player-arrests-AI patch avoids setting the global human-cop flag on the
-# player car, because the stock HUD path casts highLevelAIObjs[player] as a
-# BTC human cop and can hang. That also means no real cop speaker receives the
-# arrest notification. This hook restores only the speech call for the player
-# arrest path, without reviving the unsafe human-cop cast.
+# Regular AI cops do not pass the stock human-cop speech gate, and the
+# player-arrests-AI patch also avoids setting the global human-cop flag on the
+# player car because the stock HUD path casts highLevelAIObjs[player] as a BTC
+# human cop and can hang. This hook restores only the final arrest speech for
+# the actual arresting car stored in lastArrestingCop_, without reviving the
+# unsafe human-cop cast.
 HOOK_OFF = 0x50B20
 HOOK_ADDR = RUNTIME_BASE + HOOK_OFF
 RETURN_ADDR = 0x80060328
@@ -32,8 +33,6 @@ CAVE_OFF = 0xFEF00
 CAVE_ADDR = RUNTIME_BASE + CAVE_OFF
 CAVE_LEN = 0x120
 
-PLAYER_ARREST_CHEAT_FLAG_ADDR = 0x800F7A00
-PLAYER_CAR_OBJ_PTR_ADDR = 0x80110D0C
 SPEECH_MOBILE_ADDR = 0x8009785C
 
 REG = {
@@ -168,25 +167,32 @@ def make_hook() -> bytes:
     return pack([j(CAVE_ADDR), addiu("v0", "zero", 1)])
 
 
-def make_cave() -> bytes:
+def make_cave(*, player_only: bool = False, ticket: int = 1) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay slot already executed addiu v0,zero,1.
         sw("v0", 0x0080, "s0"),
-        # Only the explicit player-arrest cheat path should synthesize speech.
-        lui("t0", hi(PLAYER_ARREST_CHEAT_FLAG_ADDR)),
-        lhu("t0", lo(PLAYER_ARREST_CHEAT_FLAG_ADDR), "t0"),
-        addiu("t0", "t0", -1),
-        bne("t0", "zero", "done"),
-        nop(),
-        lui("t0", hi(PLAYER_CAR_OBJ_PTR_ADDR)),
-        lw("t1", lo(PLAYER_CAR_OBJ_PTR_ADDR), "t0"),
+        lw("t1", 0x006C, "s0"),  # AIHigh_BasicPerp::lastArrestingCop_
         nop(),
         beq("t1", "zero", "done"),
         nop(),
-        lw("t2", 0x006C, "s0"),  # AIHigh_BasicPerp::lastArrestingCop_
-        nop(),
-        bne("t2", "t1", "done"),
-        nop(),
+        *(
+            [
+                # Legacy first attempt: only spoke when the player car was the
+                # arresting cop and used ticket 8.
+                lui("t0", hi(0x800F7A00)),
+                lhu("t0", lo(0x800F7A00), "t0"),
+                addiu("t0", "t0", -1),
+                bne("t0", "zero", "done"),
+                nop(),
+                lui("t0", hi(0x80110D0C)),
+                lw("t2", lo(0x80110D0C), "t0"),
+                nop(),
+                bne("t1", "t2", "done"),
+                nop(),
+            ]
+            if player_only
+            else []
+        ),
         addiu("sp", "sp", -16),
         sw("ra", 12, "sp"),
         addu("a0", "t1", "zero"),
@@ -195,12 +201,12 @@ def make_cave() -> bytes:
         beq("v0", "zero", "restore"),
         nop(),
         # Same virtual call shape as AIHigh_Player::HandleSpeech:
-        # Mobile(playerCar)->Catch(8)
+        # Mobile(lastArrestingCop_)->Catch(1)
         lw("t3", 0x004C, "v0"),
         nop(),
         lh("t4", 0x0048, "t3"),
         lw("t5", 0x004C, "t3"),
-        addiu("a1", "zero", 8),
+        addiu("a1", "zero", ticket),
         jalr("t5"),
         addu("a0", "v0", "t4"),
         "restore",
@@ -227,6 +233,17 @@ def main() -> int:
 
     hook = make_hook()
     cave = make_cave()
+    previous_player_only_cave = bytes.fromhex(
+        "80 00 02 ae 0f 80 08 3c 00 7a 08 95 ff ff 08 25"
+        "1a 00 00 15 00 00 00 00 11 80 08 3c 0c 0d 09 8d"
+        "00 00 00 00 15 00 20 11 00 00 00 00 6c 00 0a 8e"
+        "00 00 00 00 11 00 49 15 00 00 00 00 f0 ff bd 27"
+        "0c 00 bf af 21 20 20 01 17 5e 02 0c 00 00 00 00"
+        "08 00 40 10 00 00 00 00 4c 00 4b 8c 00 00 00 00"
+        "48 00 6c 85 4c 00 6d 8d 08 00 05 24 09 f8 a0 01"
+        "21 20 4c 00 0c 00 bf 8f 10 00 bd 27 ca 80 01 08"
+        "00 00 00 00"
+    ) + bytes(CAVE_LEN - 0x84)
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
     if current_hook not in {STOCK, hook}:
@@ -236,7 +253,7 @@ def main() -> int:
         )
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {bytes(CAVE_LEN), cave}:
+    if current_cave not in {bytes(CAVE_LEN), cave, previous_player_only_cave}:
         raise SystemExit(f"arrest speech cave is not empty/known at 0x{CAVE_OFF:X}")
 
     if args.revert:
