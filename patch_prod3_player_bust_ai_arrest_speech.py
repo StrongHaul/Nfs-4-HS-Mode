@@ -33,7 +33,9 @@ CAVE_OFF = 0xFEF00
 CAVE_ADDR = RUNTIME_BASE + CAVE_OFF
 CAVE_LEN = 0x120
 
-SPEECH_MOBILE_ADDR = 0x8009785C
+# PROD3 NFS4.EXE address. The public/debug headers list 0x8009785C, but this
+# binary's stock MobileSpeaker call sites use jal 0x8009834C.
+SPEECH_MOBILE_ADDR = 0x8009834C
 
 REG = {
     "zero": 0,
@@ -168,7 +170,11 @@ def make_hook() -> bytes:
 
 
 def make_cave(
-    *, player_only: bool = False, speech: str = "bullhorn", ticket: int = 1
+    *,
+    player_only: bool = False,
+    speech: str = "bullhorn",
+    ticket: int = 1,
+    mobile_addr: int = SPEECH_MOBILE_ADDR,
 ) -> bytes:
     if speech not in {"bullhorn", "catch"}:
         raise SystemExit(f"unknown speech kind: {speech}")
@@ -204,7 +210,7 @@ def make_cave(
         addiu("sp", "sp", -16),
         sw("ra", 12, "sp"),
         addu("a0", "t1", "zero"),
-        jal(SPEECH_MOBILE_ADDR),
+        jal(mobile_addr),
         nop(),
         beq("v0", "zero", "restore"),
         nop(),
@@ -241,6 +247,7 @@ def main() -> int:
 
     hook = make_hook()
     cave = make_cave()
+    previous_wrong_mobile_cave = make_cave(mobile_addr=0x8009785C)
     previous_catch_cave = make_cave(speech="catch", ticket=1)
     previous_player_only_cave = bytes.fromhex(
         "80 00 02 ae 0f 80 08 3c 00 7a 08 95 ff ff 08 25"
@@ -265,6 +272,7 @@ def main() -> int:
     if current_cave not in {
         bytes(CAVE_LEN),
         cave,
+        previous_wrong_mobile_cave,
         previous_catch_cave,
         previous_player_only_cave,
     }:
