@@ -16,9 +16,9 @@ RUNTIME_BASE = 0x8000F800
 #   addu  a1,s0,zero
 #
 # Stock MobileSpeaker::Catch(s0) can be skipped by our safety guard or can
-# return before producing speech when speaker state is incomplete. For real
-# arrest tickets (s0 >= 8), enqueue the same arrested phrase directly, then run
-# the original virtual Catch call for stock side effects.
+# return before producing speech when speaker state is incomplete. Enqueue the
+# same warning/ticket/arrest event selection directly, then run the original
+# virtual Catch call for stock side effects.
 HOOK_OFF = 0x535F8
 RETURN_ADDR = 0x80062E14
 STOCK = bytes.fromhex(
@@ -31,6 +31,8 @@ CAVE_ADDR = RUNTIME_BASE + CAVE_OFF
 CAVE_LEN = 0x100
 
 SPCHNFS_C_P_ARRESTED_ADDR = 0x800945D8
+SPCHNFS_C_P_WARNING_ADDR = 0x8009462C
+SPCHNFS_C_P_TICKET_ADDR = 0x80094680
 SPCH_PLAY_SPEECH_ADDR = 0x800E8230
 
 REG = {
@@ -110,6 +112,10 @@ def bne(rs: str, rt: str, target: str) -> tuple[str, str, str, str]:
     return ("bne", rs, rt, target)
 
 
+def beq(rs: str, rt: str, target: str) -> tuple[str, str, str, str]:
+    return ("beq", rs, rt, target)
+
+
 def j(addr: int) -> int:
     return ins_j(0x02, addr)
 
@@ -151,15 +157,75 @@ def make_cave(*, set_speaker_car: bool = True) -> bytes:
         addiu("sp", "sp", -16),
         sw("ra", 12, "sp"),
         sw("v0", 8, "sp"),
-        slti("t0", "s0", 8),
-        bne("t0", "zero", "stock"),
-        nop(),
         *(
             [
                 lw("t1", 0x083C, "gp"),  # fgSpeech
                 lw("t0", 0x0060, "v0"),  # MobileSpeaker::carObj
                 nop(),
                 sw("t0", 0x038C, "t1"),  # fgSpeech->fSpeakerCar
+            ]
+            if set_speaker_car
+            else []
+        ),
+        sw("s0", 0x002C, "v0"),
+        addiu("t0", "zero", 1),
+        bne("s0", "t0", "not_arrested"),
+        nop(),
+        addiu("a0", "v0", 0x0050),
+        jal(SPCHNFS_C_P_ARRESTED_ADDR),
+        addiu("a1", "v0", 0x002C),
+        beq("zero", "zero", "play"),
+        nop(),
+        "not_arrested",
+        addiu("t0", "zero", 2),
+        bne("s0", "t0", "ticket"),
+        nop(),
+        addiu("a0", "v0", 0x0050),
+        jal(SPCHNFS_C_P_WARNING_ADDR),
+        addiu("a1", "v0", 0x002C),
+        beq("zero", "zero", "play"),
+        nop(),
+        "ticket",
+        addiu("a0", "v0", 0x0050),
+        jal(SPCHNFS_C_P_TICKET_ADDR),
+        addiu("a1", "v0", 0x002C),
+        "play",
+        jal(SPCH_PLAY_SPEECH_ADDR),
+        nop(),
+        "stock",
+        lw("v0", 8, "sp"),
+        lw("ra", 12, "sp"),
+        addiu("sp", "sp", 16),
+        lw("v1", 0x004C, "v0"),
+        addu("a1", "s0", "zero"),
+        lh("a0", 0x0048, "v1"),
+        lw("v1", 0x004C, "v1"),
+        nop(),
+        jalr("v1"),
+        addu("a0", "v0", "a0"),
+        j(RETURN_ADDR),
+        nop(),
+    ]
+    blob = pack_labeled(items, CAVE_ADDR)
+    if len(blob) > CAVE_LEN:
+        raise SystemExit(f"cave too large: 0x{len(blob):X}")
+    return blob + bytes(CAVE_LEN - len(blob))
+
+
+def make_arrest_only_cave(*, set_speaker_car: bool = True) -> bytes:
+    items: list[int | str | tuple[str, str, str, str]] = [
+        addiu("sp", "sp", -16),
+        sw("ra", 12, "sp"),
+        sw("v0", 8, "sp"),
+        slti("t0", "s0", 8),
+        bne("t0", "zero", "stock"),
+        nop(),
+        *(
+            [
+                lw("t1", 0x083C, "gp"),
+                lw("t0", 0x0060, "v0"),
+                nop(),
+                sw("t0", 0x038C, "t1"),
             ]
             if set_speaker_car
             else []
@@ -187,7 +253,7 @@ def make_cave(*, set_speaker_car: bool = True) -> bytes:
     ]
     blob = pack_labeled(items, CAVE_ADDR)
     if len(blob) > CAVE_LEN:
-        raise SystemExit(f"cave too large: 0x{len(blob):X}")
+        raise SystemExit(f"old cave too large: 0x{len(blob):X}")
     return blob + bytes(CAVE_LEN - len(blob))
 
 
@@ -203,13 +269,21 @@ def main() -> int:
     hook = make_hook()
     cave = make_cave()
     previous_no_speaker_cave = make_cave(set_speaker_car=False)
+    previous_arrest_only_cave = make_arrest_only_cave()
+    previous_arrest_only_no_speaker_cave = make_arrest_only_cave(set_speaker_car=False)
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
     if current_hook not in {STOCK, hook}:
         raise SystemExit(f"unexpected HandleSpeech hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {bytes(CAVE_LEN), cave, previous_no_speaker_cave}:
+    if current_cave not in {
+        bytes(CAVE_LEN),
+        cave,
+        previous_no_speaker_cave,
+        previous_arrest_only_cave,
+        previous_arrest_only_no_speaker_cave,
+    }:
         raise SystemExit(f"HandleSpeech direct arrest cave is not empty/known at 0x{CAVE_OFF:X}")
 
     if args.revert:
