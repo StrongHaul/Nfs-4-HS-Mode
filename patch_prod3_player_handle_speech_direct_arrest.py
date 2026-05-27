@@ -16,9 +16,10 @@ RUNTIME_BASE = 0x8000F800
 #   addu  a1,s0,zero
 #
 # Stock MobileSpeaker::Catch(s0) can be skipped by our safety guard or can
-# return before producing speech when speaker state is incomplete. Enqueue the
-# same warning/ticket/arrest event selection directly, then run the original
-# virtual Catch call for stock side effects.
+# return before producing speech when speaker state is incomplete. For now this
+# hook forces the actual loudspeaker/bullhorn event for every player
+# warning/ticket/arrest path, then runs the original virtual Catch call for
+# stock side effects.
 HOOK_OFF = 0x535F8
 RETURN_ADDR = 0x80062E14
 STOCK = bytes.fromhex(
@@ -33,6 +34,7 @@ CAVE_LEN = 0x100
 SPCHNFS_C_P_ARRESTED_ADDR = 0x800945D8
 SPCHNFS_C_P_WARNING_ADDR = 0x8009462C
 SPCHNFS_C_P_TICKET_ADDR = 0x80094680
+SPCHNFS_C_P_BULLHORN_ADDR = 0x80094770
 SPCH_PLAY_SPEECH_ADDR = 0x800E8230
 
 REG = {
@@ -152,7 +154,10 @@ def make_hook() -> bytes:
     return pack([j(CAVE_ADDR), nop()])
 
 
-def make_cave(*, set_speaker_car: bool = True) -> bytes:
+def make_cave(*, set_speaker_car: bool = True, mode: str = "bullhorn") -> bytes:
+    if mode not in {"bullhorn", "catch_events"}:
+        raise SystemExit(f"unknown mode: {mode}")
+
     items: list[int | str | tuple[str, str, str, str]] = [
         addiu("sp", "sp", -16),
         sw("ra", 12, "sp"),
@@ -167,29 +172,39 @@ def make_cave(*, set_speaker_car: bool = True) -> bytes:
             if set_speaker_car
             else []
         ),
-        sw("s0", 0x002C, "v0"),
-        addiu("t0", "zero", 1),
-        bne("s0", "t0", "not_arrested"),
-        nop(),
-        addiu("a0", "v0", 0x0050),
-        jal(SPCHNFS_C_P_ARRESTED_ADDR),
-        addiu("a1", "v0", 0x002C),
-        beq("zero", "zero", "play"),
-        nop(),
-        "not_arrested",
-        addiu("t0", "zero", 2),
-        bne("s0", "t0", "ticket"),
-        nop(),
-        addiu("a0", "v0", 0x0050),
-        jal(SPCHNFS_C_P_WARNING_ADDR),
-        addiu("a1", "v0", 0x002C),
-        beq("zero", "zero", "play"),
-        nop(),
-        "ticket",
-        addiu("a0", "v0", 0x0050),
-        jal(SPCHNFS_C_P_TICKET_ADDR),
-        addiu("a1", "v0", 0x002C),
-        "play",
+        *(
+            [
+                addiu("a0", "v0", 0x0050),
+                jal(SPCHNFS_C_P_BULLHORN_ADDR),
+                nop(),
+            ]
+            if mode == "bullhorn"
+            else [
+                sw("s0", 0x002C, "v0"),
+                addiu("t0", "zero", 1),
+                bne("s0", "t0", "not_arrested"),
+                nop(),
+                addiu("a0", "v0", 0x0050),
+                jal(SPCHNFS_C_P_ARRESTED_ADDR),
+                addiu("a1", "v0", 0x002C),
+                beq("zero", "zero", "play"),
+                nop(),
+                "not_arrested",
+                addiu("t0", "zero", 2),
+                bne("s0", "t0", "ticket"),
+                nop(),
+                addiu("a0", "v0", 0x0050),
+                jal(SPCHNFS_C_P_WARNING_ADDR),
+                addiu("a1", "v0", 0x002C),
+                beq("zero", "zero", "play"),
+                nop(),
+                "ticket",
+                addiu("a0", "v0", 0x0050),
+                jal(SPCHNFS_C_P_TICKET_ADDR),
+                addiu("a1", "v0", 0x002C),
+                "play",
+            ]
+        ),
         jal(SPCH_PLAY_SPEECH_ADDR),
         nop(),
         "stock",
@@ -269,6 +284,8 @@ def main() -> int:
     hook = make_hook()
     cave = make_cave()
     previous_no_speaker_cave = make_cave(set_speaker_car=False)
+    previous_catch_events_cave = make_cave(mode="catch_events")
+    previous_catch_events_no_speaker_cave = make_cave(set_speaker_car=False, mode="catch_events")
     previous_arrest_only_cave = make_arrest_only_cave()
     previous_arrest_only_no_speaker_cave = make_arrest_only_cave(set_speaker_car=False)
 
@@ -281,6 +298,8 @@ def main() -> int:
         bytes(CAVE_LEN),
         cave,
         previous_no_speaker_cave,
+        previous_catch_events_cave,
+        previous_catch_events_no_speaker_cave,
         previous_arrest_only_cave,
         previous_arrest_only_no_speaker_cave,
     }:
