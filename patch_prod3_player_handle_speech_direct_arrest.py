@@ -40,7 +40,9 @@ REG = {
     "a0": 4,
     "a1": 5,
     "t0": 8,
+    "t1": 9,
     "s0": 16,
+    "gp": 28,
     "sp": 29,
     "ra": 31,
 }
@@ -144,7 +146,7 @@ def make_hook() -> bytes:
     return pack([j(CAVE_ADDR), nop()])
 
 
-def make_cave() -> bytes:
+def make_cave(*, set_speaker_car: bool = True) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         addiu("sp", "sp", -16),
         sw("ra", 12, "sp"),
@@ -152,6 +154,16 @@ def make_cave() -> bytes:
         slti("t0", "s0", 8),
         bne("t0", "zero", "stock"),
         nop(),
+        *(
+            [
+                lw("t1", 0x083C, "gp"),  # fgSpeech
+                lw("t0", 0x0060, "v0"),  # MobileSpeaker::carObj
+                nop(),
+                sw("t0", 0x038C, "t1"),  # fgSpeech->fSpeakerCar
+            ]
+            if set_speaker_car
+            else []
+        ),
         addiu("t0", "zero", 1),
         sw("t0", 0x002C, "v0"),
         addiu("a0", "v0", 0x0050),
@@ -190,13 +202,14 @@ def main() -> int:
 
     hook = make_hook()
     cave = make_cave()
+    previous_no_speaker_cave = make_cave(set_speaker_car=False)
 
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
     if current_hook not in {STOCK, hook}:
         raise SystemExit(f"unexpected HandleSpeech hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {bytes(CAVE_LEN), cave}:
+    if current_cave not in {bytes(CAVE_LEN), cave, previous_no_speaker_cave}:
         raise SystemExit(f"HandleSpeech direct arrest cave is not empty/known at 0x{CAVE_OFF:X}")
 
     if args.revert:

@@ -52,6 +52,7 @@ REG = {
     "t4": 12,
     "t5": 13,
     "s0": 16,
+    "gp": 28,
     "sp": 29,
     "ra": 31,
 }
@@ -238,7 +239,7 @@ def make_cave(
     return blob + bytes(CAVE_LEN - len(blob))
 
 
-def make_direct_arrest_cave() -> bytes:
+def make_direct_arrest_cave(*, set_speaker_car: bool = True) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay slot already executed addiu v0,zero,1.
         sw("v0", 0x0080, "s0"),
@@ -253,6 +254,16 @@ def make_direct_arrest_cave() -> bytes:
         nop(),
         beq("v0", "zero", "restore"),
         nop(),
+        *(
+            [
+                lw("t2", 0x083C, "gp"),  # fgSpeech
+                lw("t0", 0x0060, "v0"),  # MobileSpeaker::carObj
+                nop(),
+                sw("t0", 0x038C, "t2"),  # fgSpeech->fSpeakerCar
+            ]
+            if set_speaker_car
+            else []
+        ),
         addiu("t0", "zero", 1),
         sw("t0", 0x002C, "v0"),  # MobileSpeaker::fArrest.flags
         addiu("a0", "v0", 0x0050),  # MobileSpeaker::VOICE
@@ -284,6 +295,7 @@ def main() -> int:
 
     hook = make_hook()
     cave = make_direct_arrest_cave()
+    previous_direct_no_speaker_cave = make_direct_arrest_cave(set_speaker_car=False)
     previous_bullhorn_cave = make_cave()
     previous_wrong_mobile_cave = make_cave(mobile_addr=0x8009785C)
     previous_catch_cave = make_cave(speech="catch", ticket=1)
@@ -310,6 +322,7 @@ def main() -> int:
     if current_cave not in {
         bytes(CAVE_LEN),
         cave,
+        previous_direct_no_speaker_cave,
         previous_bullhorn_cave,
         previous_wrong_mobile_cave,
         previous_catch_cave,
