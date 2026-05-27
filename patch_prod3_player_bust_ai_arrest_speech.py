@@ -18,9 +18,9 @@ RUNTIME_BASE = 0x8000F800
 # Regular AI cops do not pass the stock human-cop speech gate, and the
 # player-arrests-AI patch also avoids setting the global human-cop flag on the
 # player car because the stock HUD path casts highLevelAIObjs[player] as a BTC
-# human cop and can hang. This hook restores a short MobileSpeaker::Catch(1)
-# call for the actual arresting car stored in lastArrestingCop_, without
-# reviving the unsafe human-cop cast or the full player HandleSpeech epilogue.
+# human cop and can hang. Direct MobileSpeaker::Catch(1) can silently return
+# when the speaker has no current Perp() target, so this hook calls the same
+# SPCHNFS_C_P_ARRESTED event that Catch uses internally and then plays speech.
 HOOK_OFF = 0x50B20
 HOOK_ADDR = RUNTIME_BASE + HOOK_OFF
 RETURN_ADDR = 0x80060328
@@ -36,6 +36,8 @@ CAVE_LEN = 0x120
 # PROD3 NFS4.EXE address. The public/debug headers list 0x8009785C, but this
 # binary's stock MobileSpeaker call sites use jal 0x8009834C.
 SPEECH_MOBILE_ADDR = 0x8009834C
+SPCHNFS_C_P_ARRESTED_ADDR = 0x800945D8
+SPCH_PLAY_SPEECH_ADDR = 0x800E8230
 
 REG = {
     "zero": 0,
@@ -236,6 +238,41 @@ def make_cave(
     return blob + bytes(CAVE_LEN - len(blob))
 
 
+def make_direct_arrest_cave() -> bytes:
+    items: list[int | str | tuple[str, str, str, str]] = [
+        # Hook delay slot already executed addiu v0,zero,1.
+        sw("v0", 0x0080, "s0"),
+        lw("t1", 0x006C, "s0"),  # AIHigh_BasicPerp::lastArrestingCop_
+        nop(),
+        beq("t1", "zero", "done"),
+        nop(),
+        addiu("sp", "sp", -16),
+        sw("ra", 12, "sp"),
+        addu("a0", "t1", "zero"),
+        jal(SPEECH_MOBILE_ADDR),
+        nop(),
+        beq("v0", "zero", "restore"),
+        nop(),
+        addiu("t0", "zero", 1),
+        sw("t0", 0x002C, "v0"),  # MobileSpeaker::fArrest.flags
+        addiu("a0", "v0", 0x0050),  # MobileSpeaker::VOICE
+        jal(SPCHNFS_C_P_ARRESTED_ADDR),
+        addiu("a1", "v0", 0x002C),  # delay slot: &fArrest
+        jal(SPCH_PLAY_SPEECH_ADDR),
+        nop(),
+        "restore",
+        lw("ra", 12, "sp"),
+        addiu("sp", "sp", 16),
+        "done",
+        j(RETURN_ADDR),
+        nop(),
+    ]
+    blob = pack_labeled(items, CAVE_ADDR)
+    if len(blob) > CAVE_LEN:
+        raise SystemExit(f"direct arrest cave too large: 0x{len(blob):X}")
+    return blob + bytes(CAVE_LEN - len(blob))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--revert", action="store_true")
@@ -246,7 +283,7 @@ def main() -> int:
     original = bytes(data)
 
     hook = make_hook()
-    cave = make_cave(speech="catch", ticket=1)
+    cave = make_direct_arrest_cave()
     previous_bullhorn_cave = make_cave()
     previous_wrong_mobile_cave = make_cave(mobile_addr=0x8009785C)
     previous_catch_cave = make_cave(speech="catch", ticket=1)
