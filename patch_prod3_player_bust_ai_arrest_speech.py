@@ -18,9 +18,9 @@ RUNTIME_BASE = 0x8000F800
 # Regular AI cops do not pass the stock human-cop speech gate, and the
 # player-arrests-AI patch also avoids setting the global human-cop flag on the
 # player car because the stock HUD path casts highLevelAIObjs[player] as a BTC
-# human cop and can hang. This hook restores only the bullhorn speech for the
-# actual arresting car stored in lastArrestingCop_, without reviving the unsafe
-# human-cop cast.
+# human cop and can hang. This hook restores a short MobileSpeaker::Catch(1)
+# call for the actual arresting car stored in lastArrestingCop_, without
+# reviving the unsafe human-cop cast or the full player HandleSpeech epilogue.
 HOOK_OFF = 0x50B20
 HOOK_ADDR = RUNTIME_BASE + HOOK_OFF
 RETURN_ADDR = 0x80060328
@@ -246,7 +246,8 @@ def main() -> int:
     original = bytes(data)
 
     hook = make_hook()
-    cave = make_cave()
+    cave = make_cave(speech="catch", ticket=1)
+    previous_bullhorn_cave = make_cave()
     previous_wrong_mobile_cave = make_cave(mobile_addr=0x8009785C)
     previous_catch_cave = make_cave(speech="catch", ticket=1)
     previous_player_only_cave = bytes.fromhex(
@@ -272,6 +273,7 @@ def main() -> int:
     if current_cave not in {
         bytes(CAVE_LEN),
         cave,
+        previous_bullhorn_cave,
         previous_wrong_mobile_cave,
         previous_catch_cave,
         previous_player_only_cave,
