@@ -136,7 +136,7 @@ def make_old_cave() -> bytes:
     return blob + bytes(OLD_CAVE_LEN - len(blob))
 
 
-def make_cave() -> bytes:
+def make_player_guard_cave(player_index_limit: int) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         lw("t0", 0x0000, "s0"),      # AIHigh_Base::carObj_
         lui("t1", 0x8011),
@@ -156,7 +156,7 @@ def make_cave() -> bytes:
         nop(),
         "player_car",
         # The player can be arrested by cop cars with indices >= 2.
-        sltiu("t0", "s1", 8),
+        sltiu("t0", "s1", player_index_limit),
         beq("t0", "zero", "skip"),
         nop(),
         "allow",
@@ -174,6 +174,10 @@ def make_cave() -> bytes:
     return blob + bytes(CAVE_LEN - len(blob))
 
 
+def make_cave() -> bytes:
+    return make_player_guard_cave(9)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="PROD3: guard SR player-bust pull-over HUD index.")
     parser.add_argument("--revert", action="store_true")
@@ -186,12 +190,13 @@ def main() -> int:
     hook = pack([j(CAVE_ADDR), nop()])
     cave = make_cave()
     old_cave = make_old_cave() + bytes(CAVE_LEN - OLD_CAVE_LEN)
+    previous_player8_cave = make_player_guard_cave(8)
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + len(STOCK)])
     if current_hook not in {STOCK, hook}:
         raise SystemExit(f"unexpected hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {bytes(CAVE_LEN), cave, old_cave}:
+    if current_cave not in {bytes(CAVE_LEN), cave, old_cave, previous_player8_cave}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}: {current_cave[:16].hex(' ')}")
 
     if args.revert:
