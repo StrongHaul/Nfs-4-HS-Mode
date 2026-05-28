@@ -6,3 +6,4 @@ __pycache__/
 _tmp_*/
 *.tmp
 *.log
+*.orig_before_*
