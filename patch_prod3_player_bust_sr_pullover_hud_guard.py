@@ -12,13 +12,12 @@ BACKUP_SUFFIX = ".orig_before_prod3_player_bust_sr_pullover_hud_guard"
 RUNTIME_BASE = 0x8000F800
 
 # AIHigh_Player::HandlePullOver, just before:
-#   Cars_gHumanRaceCarList[s1] -> ...
+#   Cars_gList[s1] -> ...
 #
 # The player-bust-AI cheat can complete a Single Race AI racer arrest while s1
-# is a cop/AI car index. Letting that AI-perp path run the full player
-# HandleSpeech epilogue can hang. Keep the old narrow guard for AI perps, but
-# allow normal cop indices when this HandleSpeech object belongs to the player
-# car, so regular police-arrests-player speech still works.
+# is garbage. Letting that path index the global car list can hang. Keep the
+# stock speech path for every valid car slot, including AI cops, and skip only
+# clearly invalid indices.
 HOOK_OFF = 0x535DC
 RETURN_ADDR = 0x80062DE4
 SKIP_ADDR = 0x80062E14
@@ -175,7 +174,22 @@ def make_player_guard_cave(player_index_limit: int) -> bytes:
 
 
 def make_cave() -> bytes:
-    return make_player_guard_cave(9)
+    items: list[int | str | tuple[str, str, str, str]] = [
+        sltiu("t0", "s1", 9),
+        beq("t0", "zero", "skip"),
+        nop(),
+        lui("v1", 0x8011),
+        addiu("v1", "v1", 0x0CA0),
+        j(RETURN_ADDR),
+        nop(),
+        "skip",
+        j(SKIP_ADDR),
+        nop(),
+    ]
+    blob = pack_labeled(items, CAVE_ADDR)
+    if len(blob) > CAVE_LEN:
+        raise SystemExit(f"cave too large: 0x{len(blob):X}")
+    return blob + bytes(CAVE_LEN - len(blob))
 
 
 def main() -> int:
@@ -190,13 +204,14 @@ def main() -> int:
     hook = pack([j(CAVE_ADDR), nop()])
     cave = make_cave()
     old_cave = make_old_cave() + bytes(CAVE_LEN - OLD_CAVE_LEN)
+    previous_player9_cave = make_player_guard_cave(9)
     previous_player8_cave = make_player_guard_cave(8)
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + len(STOCK)])
     if current_hook not in {STOCK, hook}:
         raise SystemExit(f"unexpected hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {bytes(CAVE_LEN), cave, old_cave, previous_player8_cave}:
+    if current_cave not in {bytes(CAVE_LEN), cave, old_cave, previous_player8_cave, previous_player9_cave}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}: {current_cave[:16].hex(' ')}")
 
     if args.revert:
