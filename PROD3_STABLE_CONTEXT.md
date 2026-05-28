@@ -13,10 +13,12 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 Последняя подтвержденная пользователем стабильная точка:
 
 ```text
-NFS4.EXE  3AF6252AC39667194FB63854251321EF
-FRONT.BIN FD3D194CFCB7D0D68A6FC2FC260BB161
-git       2562023 Use car type for reverse light police filter
+NFS4.EXE  65C5A414F944093A66A12155B63B5047
+FRONT.BIN 5062835E2B00A6F7F96E8B4C5A38AF1C
+git       a27978b Allow valid cop indices for loudspeaker speech
 ```
+
+Проверено пользователем после правок cop speech: зависаний не наблюдается, фары/поворотники/белые задние огни работают, полицейские спичи через громкоговоритель снова работают.
 
 Состояние на момент фиксации:
 
@@ -204,7 +206,7 @@ DrawC reverse mask hook:
 `FRONT.BIN` текущей стабильной версии:
 
 ```text
-FD3D194CFCB7D0D68A6FC2FC260BB161
+5062835E2B00A6F7F96E8B4C5A38AF1C
 ```
 
 В нем сохранены предыдущие PROD3-изменения фронтенда:
@@ -268,4 +270,3 @@ f832e7d Guard player bust no-cops bypass
 5. Арестовать ИИ гонщика: видимых проблем и ошибок DuckStation быть не должно.
 6. Проверить полицейскую машину/копов: белые задние не должны гореть постоянно.
 7. Проверить поворотники: они должны оставаться попеременными, а не синхронными.
-
