@@ -12,8 +12,10 @@ BACKUP_SUFFIX = ".orig_before_prod3_player_civilian_blink_cheat_gate"
 RUNTIME_BASE = 0x8000F800
 
 # New cheat flag. Default file value is zero, so the civilian blink feature is
-# off unless DuckStation writes 0001 here.
-BLINK_CHEAT_ADDR = 0x800551F8
+# off unless DuckStation writes 0001 here. Keep it in the same low zero/data
+# area as the known-working 80054B7C traffic cheat, but do not overlap it.
+BLINK_CHEAT_ADDR = 0x80054B78
+LEGACY_BLINK_CHEAT_ADDR = 0x800551F8
 
 # Existing working player civilian strobe/blink cave.
 STROBE_HOOK_OFF = 0x45814
@@ -119,10 +121,16 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def make_gate(base_addr: int, *, disabled_addr: int, return_addr: int) -> bytes:
+def make_gate(
+    base_addr: int,
+    *,
+    disabled_addr: int,
+    return_addr: int,
+    cheat_addr: int = BLINK_CHEAT_ADDR,
+) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
-        lui("t0", hi(BLINK_CHEAT_ADDR)),
-        lhu("t1", lo(BLINK_CHEAT_ADDR), "t0"),
+        lui("t0", hi(cheat_addr)),
+        lhu("t1", lo(cheat_addr), "t0"),
         addiu("t1", "t1", -1),
         bne("t1", "zero", "disabled"),
         nop(),
@@ -159,7 +167,7 @@ def md5(data: bytes) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="PROD3: gate ordinary-player blinking light feature behind cheat 800551F8."
+        description="PROD3: gate ordinary-player blinking light feature behind cheat 80054B78."
     )
     parser.add_argument("--revert", action="store_true")
     args = parser.parse_args()
@@ -200,6 +208,33 @@ def main() -> int:
         ),
         DRAW_GATE_LEN,
     )
+    legacy_strobe_gate = padded(
+        make_gate(
+            STROBE_GATE_ADDR,
+            disabled_addr=STROBE_SKIP_ADDR,
+            return_addr=STROBE_COUNTER_LOAD_RETURN_ADDR,
+            cheat_addr=LEGACY_BLINK_CHEAT_ADDR,
+        ),
+        STROBE_GATE_LEN,
+    )
+    legacy_object_gate = padded(
+        make_gate(
+            OBJECT_GATE_ADDR,
+            disabled_addr=OBJECT_STOCK_ADDR,
+            return_addr=OBJECT_COUNTER_LOAD_RETURN_ADDR,
+            cheat_addr=LEGACY_BLINK_CHEAT_ADDR,
+        ),
+        OBJECT_GATE_LEN,
+    )
+    legacy_draw_gate = padded(
+        make_gate(
+            DRAW_GATE_ADDR,
+            disabled_addr=DRAW_STOCK_ADDR,
+            return_addr=DRAW_COUNTER_LOAD_RETURN_ADDR,
+            cheat_addr=LEGACY_BLINK_CHEAT_ADDR,
+        ),
+        DRAW_GATE_LEN,
+    )
 
     checks = [
         (STROBE_HOOK_OFF, strobe_stock, strobe_patch, "strobe hook"),
@@ -212,13 +247,13 @@ def main() -> int:
             raise SystemExit(f"unexpected {name} bytes at 0x{off:X}: {current.hex(' ')}")
 
     caves = [
-        (STROBE_GATE_OFF, STROBE_GATE_LEN, strobe_gate, "strobe gate"),
-        (OBJECT_GATE_OFF, OBJECT_GATE_LEN, object_gate, "object gate"),
-        (DRAW_GATE_OFF, DRAW_GATE_LEN, draw_gate, "draw gate"),
+        (STROBE_GATE_OFF, STROBE_GATE_LEN, strobe_gate, legacy_strobe_gate, "strobe gate"),
+        (OBJECT_GATE_OFF, OBJECT_GATE_LEN, object_gate, legacy_object_gate, "object gate"),
+        (DRAW_GATE_OFF, DRAW_GATE_LEN, draw_gate, legacy_draw_gate, "draw gate"),
     ]
-    for off, size, blob, name in caves:
+    for off, size, blob, legacy_blob, name in caves:
         current = bytes(data[off : off + size])
-        if current not in {bytes(size), blob}:
+        if current not in {bytes(size), blob, legacy_blob}:
             raise SystemExit(f"{name} is not empty/known at 0x{off:X}: {current[:16].hex(' ')}")
 
     # Leave BLINK_CHEAT_ADDR as zero in the file for default-off behavior.
@@ -226,7 +261,7 @@ def main() -> int:
         data[STROBE_HOOK_OFF : STROBE_HOOK_OFF + 8] = strobe_stock
         data[OBJECT_HOOK_OFF : OBJECT_HOOK_OFF + 8] = object_stock
         data[DRAW_HOOK_OFF : DRAW_HOOK_OFF + 8] = draw_stock
-        for off, size, _, _ in caves:
+        for off, size, _, _, _ in caves:
             data[off : off + size] = bytes(size)
     else:
         data[STROBE_GATE_OFF : STROBE_GATE_OFF + STROBE_GATE_LEN] = strobe_gate
@@ -244,8 +279,8 @@ def main() -> int:
 
     print(f"NFS4.EXE {md5(bytes(data))}")
     print("player civilian blink feature gate:", "reverted" if args.revert else "patched")
-    print("enable:  800551F8 0001")
-    print("disable: 800551F8 0000")
+    print("enable:  80054B78 0001")
+    print("disable: 80054B78 0000")
     return 0
 
 
