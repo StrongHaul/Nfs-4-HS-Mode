@@ -11,11 +11,11 @@ DEFAULT_EXE_GLOB = "PROD 3*/NFS4.EXE"
 BACKUP_SUFFIX = ".orig_before_prod3_player_command_specials"
 RUNTIME_BASE = 0x8000F800
 
-# L1+Down reaches player input case 11. Police cars already toggle
-# car+0x570 bit 1 there; patch the player/civilian path to use the same bit
-# instead of falling through to hazard lights.
-SPECIALS_FLAG_OFF = 0x570
-SPECIALS_FLAG_MASK = 0x0002
+# L1+Down reaches the civilian hazard-light path. Let the stock path keep
+# toggling hazards, then mirror custom specials from the resulting light flag:
+# car+0x447 bits 0x08/0x10 are left/right hazard/turn signal state.
+SPECIALS_FLAG_OFF = 0x447
+SPECIALS_FLAG_MASK = 0x0018
 PLAYER_CAR_PTR_ADDR = 0x80110D0C
 
 STROBE_GATE_OFF = 0x45948
@@ -151,7 +151,7 @@ def padded(blob: bytes, size: int) -> bytes:
 
 def read_specials_flag(tmp_reg: str, car_reg: str) -> list[int]:
     return [
-        lw(tmp_reg, SPECIALS_FLAG_OFF, car_reg),
+        lbu(tmp_reg, SPECIALS_FLAG_OFF, car_reg),
         andi(tmp_reg, tmp_reg, SPECIALS_FLAG_MASK),
     ]
 
@@ -257,6 +257,8 @@ def patch(exe: Path, *, revert: bool = False) -> None:
 
     known_light_gate_prefixes = {
         bytes.fromhex("00 00 09 24"),
+        bytes.fromhex("47 04 a9 92"),
+        bytes.fromhex("47 04 49 92"),
         bytes.fromhex("70 05 a9 8e"),
         bytes.fromhex("70 05 49 8e"),
         bytes.fromhex("45 04 a9 92"),
@@ -292,7 +294,11 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     expected_installed[0 : len(type_cave)] = type_cave
     bit_rel = SIREN_BIT_CAVE_OFF - cave_start
     expected_installed[bit_rel : bit_rel + len(bit_cave)] = bit_cave
-    old_installed_prefixes = {bytes.fromhex("08 00 40 14"), bytes.fromhex("0a 00 40 14")}
+    old_installed_prefixes = {
+        bytes.fromhex("08 00 40 14"),
+        bytes.fromhex("09 00 40 14"),
+        bytes.fromhex("0a 00 40 14"),
+    }
     if cave_now not in (bytes(cave_end - cave_start), bytes(expected_installed)) and cave_now[:4] not in old_installed_prefixes:
         raise SystemExit(f"unexpected command special cave bytes: {cave_now[:16].hex(' ')}")
 
@@ -324,7 +330,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         data[DRAW_GATE_OFF : DRAW_GATE_OFF + GATE_LEN] = draw_gate
         data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = type_patch
         data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = bit_patch
-        data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = bytes(4)
+        data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = EXPECTED_CASE11_GATE
         data[cave_start:cave_end] = bytes(cave_end - cave_start)
         data[SIREN_TYPE_CAVE_OFF : SIREN_TYPE_CAVE_OFF + len(type_cave)] = type_cave
         data[SIREN_BIT_CAVE_OFF : SIREN_BIT_CAVE_OFF + len(bit_cave)] = bit_cave
