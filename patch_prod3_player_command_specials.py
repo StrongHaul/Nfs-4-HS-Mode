@@ -11,11 +11,11 @@ DEFAULT_EXE_GLOB = "PROD 3*/NFS4.EXE"
 BACKUP_SUFFIX = ".orig_before_prod3_player_command_specials"
 RUNTIME_BASE = 0x8000F800
 
-# L1+Down reaches the civilian hazard-light path. Let the stock path keep
-# toggling hazards, then mirror custom specials from the resulting light flag:
-# car+0x447 bits 0x08/0x10 are left/right hazard/turn signal state.
-SPECIALS_FLAG_OFF = 0x447
-SPECIALS_FLAG_MASK = 0x0018
+# L1+Down reaches the civilian hazard-light path at 0x80092E14. Keep the
+# stock hazard toggle intact, but also flip a private mod flag. The custom
+# lights/siren then read this flag instead of unstable car light state bytes.
+SPECIALS_STATE_OFF = 0x455E0
+SPECIALS_STATE_ADDR = RUNTIME_BASE + SPECIALS_STATE_OFF
 PLAYER_CAR_PTR_ADDR = 0x80110D0C
 
 STROBE_GATE_OFF = 0x45948
@@ -33,23 +33,29 @@ DRAW_STOCK_ADDR = 0x800F78AC
 SIREN_TYPE_HOOK_OFF = 0x066D54
 SIREN_BIT_HOOK_OFF = 0x066D68
 PLAYER_COMMAND_CASE11_GATE_OFF = 0x0835E0
+PLAYER_COMMAND_CIVILIAN_HAZARD_OFF = 0x083614
 SIREN_TYPE_CAVE_OFF = 0x45444
 SIREN_BIT_CAVE_OFF = 0x45484
+COMMAND_TOGGLE_CAVE_OFF = 0x454C0
 
 SIREN_TYPE_ALLOW_ADDR = 0x8007655C
 SIREN_TYPE_SKIP_ADDR = 0x8007663C
 SIREN_BIT_ALLOW_ADDR = 0x80076570
 SIREN_BIT_SKIP_ADDR = 0x80076600
+COMMAND_TOGGLE_RETURN_ADDR = 0x80092E1C
 
 EXPECTED_SIREN_TYPE_HOOK = bytes.fromhex("39 00 40 10 00 00 00 00")
 EXPECTED_SIREN_BIT_HOOK = bytes.fromhex("25 00 40 10 24 13 82 2a")
 EXPECTED_CASE11_GATE = bytes.fromhex("0c 00 40 10")
+EXPECTED_CIVILIAN_HAZARD_HOOK = bytes.fromhex("47 04 03 92 00 00 00 00")
 
 REG = {
     "zero": 0,
     "v0": 2,
+    "v1": 3,
     "t0": 8,
     "t1": 9,
+    "s0": 16,
     "s2": 18,
     "s4": 20,
     "s5": 21,
@@ -108,8 +114,16 @@ def lbu(rt: str, off: int, rs: str) -> int:
     return ins_i(0x24, REG[rs], REG[rt], off)
 
 
+def sb(rt: str, off: int, rs: str) -> int:
+    return ins_i(0x28, REG[rs], REG[rt], off)
+
+
 def slti(rt: str, rs: str, imm: int) -> int:
     return ins_i(0x0A, REG[rs], REG[rt], imm)
+
+
+def xori(rt: str, rs: str, imm: int) -> int:
+    return ins_i(0x0E, REG[rs], REG[rt], imm)
 
 
 def or_(rd: str, rs: str, rt: str) -> int:
@@ -149,16 +163,16 @@ def padded(blob: bytes, size: int) -> bytes:
     return blob + bytes(size - len(blob))
 
 
-def read_specials_flag(tmp_reg: str, car_reg: str) -> list[int]:
+def read_specials_state(result_reg: str) -> list[int]:
     return [
-        lbu(tmp_reg, SPECIALS_FLAG_OFF, car_reg),
-        andi(tmp_reg, tmp_reg, SPECIALS_FLAG_MASK),
+        lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
+        lbu(result_reg, SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
     ]
 
 
 def make_light_gate(*, car_reg: str, disabled_addr: int, return_addr: int) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
-        *read_specials_flag("t1", car_reg),
+        *read_specials_state("t1"),
         beq("t1", "zero", "disabled"),
         nop(),
         lui("t0", 0x8005),
@@ -180,8 +194,8 @@ def make_siren_type_cave() -> bytes:
         lw("t0", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
         bne("s2", "t0", "skip"),
         nop(),
-        *read_specials_flag("t0", "s2"),
-        beq("t0", "zero", "skip"),
+        *read_specials_state("t1"),
+        beq("t1", "zero", "skip"),
         nop(),
         "allow",
         j(SIREN_TYPE_ALLOW_ADDR),
@@ -201,8 +215,8 @@ def make_siren_bit_cave() -> bytes:
         lw("t0", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
         bne("s2", "t0", "skip"),
         nop(),
-        *read_specials_flag("t0", "s2"),
-        beq("t0", "zero", "skip"),
+        *read_specials_state("t1"),
+        beq("t1", "zero", "skip"),
         nop(),
         "allow",
         slti("v0", "s4", 4900),
@@ -214,6 +228,19 @@ def make_siren_bit_cave() -> bytes:
         nop(),
     ]
     return pack_labeled(items, runtime(SIREN_BIT_CAVE_OFF))
+
+
+def make_command_toggle_cave() -> bytes:
+    items: list[int] = [
+        lbu("v1", 0x447, "s0"),
+        lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
+        lbu("t1", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
+        xori("t1", "t1", 1),
+        sb("t1", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
+        j(COMMAND_TOGGLE_RETURN_ADDR),
+        nop(),
+    ]
+    return pack(items)
 
 
 def hook_bytes(cave_off: int) -> bytes:
@@ -267,6 +294,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         bytes.fromhex("46 04 49 92"),
         bytes.fromhex("49 04 a9 92"),
         bytes.fromhex("49 04 49 92"),
+        bytes.fromhex("05 80 08 3c"),
     }
     for name, old in (("strobe", strobe_old), ("object", object_old), ("draw", draw_old)):
         if old[:4] not in known_light_gate_prefixes:
@@ -285,15 +313,23 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     if case11_gate not in (EXPECTED_CASE11_GATE, bytes(4)):
         raise SystemExit(f"unexpected case 11 command gate bytes: {case11_gate.hex(' ')}")
 
+    civilian_hazard_hook = bytes(data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8])
+    command_toggle_patch = hook_bytes(COMMAND_TOGGLE_CAVE_OFF)
+    if civilian_hazard_hook not in (EXPECTED_CIVILIAN_HAZARD_HOOK, command_toggle_patch):
+        raise SystemExit(f"unexpected civilian hazard hook bytes: {civilian_hazard_hook.hex(' ')}")
+
     type_cave = make_siren_type_cave()
     bit_cave = make_siren_bit_cave()
+    command_toggle_cave = make_command_toggle_cave()
     cave_start = SIREN_TYPE_CAVE_OFF
-    cave_end = SIREN_BIT_CAVE_OFF + len(bit_cave)
+    cave_end = max(SIREN_BIT_CAVE_OFF + len(bit_cave), COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave), SPECIALS_STATE_OFF + 4)
     cave_now = bytes(data[cave_start:cave_end])
     expected_installed = bytearray(cave_end - cave_start)
     expected_installed[0 : len(type_cave)] = type_cave
     bit_rel = SIREN_BIT_CAVE_OFF - cave_start
     expected_installed[bit_rel : bit_rel + len(bit_cave)] = bit_cave
+    toggle_rel = COMMAND_TOGGLE_CAVE_OFF - cave_start
+    expected_installed[toggle_rel : toggle_rel + len(command_toggle_cave)] = command_toggle_cave
     old_installed_prefixes = {
         bytes.fromhex("08 00 40 14"),
         bytes.fromhex("09 00 40 14"),
@@ -323,6 +359,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = EXPECTED_SIREN_TYPE_HOOK
         data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = EXPECTED_SIREN_BIT_HOOK
         data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = EXPECTED_CASE11_GATE
+        data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8] = EXPECTED_CIVILIAN_HAZARD_HOOK
         data[cave_start:cave_end] = bytes(cave_end - cave_start)
     else:
         data[STROBE_GATE_OFF : STROBE_GATE_OFF + GATE_LEN] = strobe_gate
@@ -331,9 +368,12 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = type_patch
         data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = bit_patch
         data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = EXPECTED_CASE11_GATE
+        data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8] = command_toggle_patch
         data[cave_start:cave_end] = bytes(cave_end - cave_start)
         data[SIREN_TYPE_CAVE_OFF : SIREN_TYPE_CAVE_OFF + len(type_cave)] = type_cave
         data[SIREN_BIT_CAVE_OFF : SIREN_BIT_CAVE_OFF + len(bit_cave)] = bit_cave
+        data[COMMAND_TOGGLE_CAVE_OFF : COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave)] = command_toggle_cave
+        data[SPECIALS_STATE_OFF : SPECIALS_STATE_OFF + 4] = bytes(4)
 
     if bytes(data) != original:
         backup = exe.with_name(exe.name + BACKUP_SUFFIX)
