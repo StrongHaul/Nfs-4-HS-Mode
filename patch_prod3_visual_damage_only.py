@@ -16,10 +16,11 @@ HOOK_STOCK = bytes.fromhex("e0 ff bd 27 14 00 b1 af")
 
 CAVE_OFF = 0x108B00
 CAVE_ADDR = RUNTIME_BASE + CAVE_OFF
-FLAG_ADDR = CAVE_ADDR + 4
 RETURN_ADDR = HOOK_ADDR + 8
 STATE_OFF = CAVE_OFF + 0x6F00
 STATE_ADDR = RUNTIME_BASE + STATE_OFF
+FLAG_OFF = STATE_OFF + 4
+FLAG_ADDR = RUNTIME_BASE + FLAG_OFF
 
 # Default-off implementation. The EXE contains only a tiny switchable RAM
 # patcher. With FLAG_ADDR immediate == 0 it restores stock code; with 1 it
@@ -143,8 +144,8 @@ def block_words(*, patched: bool) -> list[tuple[int, int]]:
 def build_patcher_cave() -> bytes:
     code: list[int] = []
     code.append(sw(REG["s1"], 0x14, REG["sp"]))  # original hook instruction
-    flag_index = len(code)
-    code.append(addiu(REG["t1"], REG["zero"], 0))
+    code.extend(load_addr(REG["t0"], FLAG_ADDR))
+    code.append(lhu(REG["t1"], 0, REG["t0"]))
     code.extend(load_addr(REG["t0"], STATE_ADDR))
     code.append(lhu(REG["t0"], 0, REG["t0"]))
     same_state_branch_index = len(code)
@@ -177,7 +178,6 @@ def build_patcher_cave() -> bytes:
         (return_addr - (same_state_branch_pc + 4)) // 4,
     )
 
-    assert CAVE_ADDR + flag_index * 4 == FLAG_ADDR
     return b"".join(struct.pack("<I", word) for word in code)
 
 
@@ -217,6 +217,7 @@ def apply_patch(exe: Path, *, revert: bool = False) -> None:
         data[HOOK_OFF : HOOK_OFF + 8] = HOOK_STOCK
         data[CAVE_OFF : CAVE_OFF + len(cave)] = b"\x00" * len(cave)
         data[STATE_OFF : STATE_OFF + 4] = b"\x00" * 4
+        data[FLAG_OFF : FLAG_OFF + 4] = b"\x00" * 4
     else:
         current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
         if current_hook not in (HOOK_STOCK, build_hook()):
@@ -224,6 +225,7 @@ def apply_patch(exe: Path, *, revert: bool = False) -> None:
         data[HOOK_OFF : HOOK_OFF + 8] = build_hook()
         data[CAVE_OFF : CAVE_OFF + len(cave)] = cave
         data[STATE_OFF : STATE_OFF + 4] = b"\x00" * 4
+        data[FLAG_OFF : FLAG_OFF + 4] = b"\x00" * 4
 
     exe.write_bytes(data)
     print(f"NFS4.EXE {md5(data)}")
