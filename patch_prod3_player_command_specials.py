@@ -11,10 +11,10 @@ DEFAULT_EXE_GLOB = "PROD 3*/NFS4.EXE"
 BACKUP_SUFFIX = ".orig_before_prod3_player_command_specials"
 RUNTIME_BASE = 0x8000F800
 
-# The civilian player command that normally feeds turn-signal state is mirrored
-# in car+0x446. For player civilian special signals, use that byte as the
-# on/off state for custom blinking lights and siren audio.
-COMMAND_BYTE_OFF = 0x446
+# The civilian player command that normally feeds hazard/turn-signal state is
+# mirrored into the visual light bytes. Treat either side as "specials on".
+COMMAND_LEFT_BYTE_OFF = 0x445
+COMMAND_RIGHT_BYTE_OFF = 0x446
 PLAYER_CAR_PTR_ADDR = 0x80110D0C
 
 STROBE_GATE_OFF = 0x45948
@@ -65,6 +65,10 @@ def ins_j(op: int, addr: int) -> int:
     return (op << 26) | ((addr >> 2) & 0x03FFFFFF)
 
 
+def ins_r(rs: int, rt: int, rd: int, shamt: int, funct: int) -> int:
+    return (rs << 21) | (rt << 16) | (rd << 11) | (shamt << 6) | funct
+
+
 def pack(words: list[int]) -> bytes:
     return struct.pack("<" + "I" * len(words), *words)
 
@@ -99,6 +103,10 @@ def lbu(rt: str, off: int, rs: str) -> int:
 
 def slti(rt: str, rs: str, imm: int) -> int:
     return ins_i(0x0A, REG[rs], REG[rt], imm)
+
+
+def or_(rd: str, rs: str, rt: str) -> int:
+    return ins_r(REG[rs], REG[rt], REG[rd], 0, 0x25)
 
 
 def nop() -> int:
@@ -136,7 +144,9 @@ def padded(blob: bytes, size: int) -> bytes:
 
 def make_light_gate(*, car_reg: str, disabled_addr: int, return_addr: int) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
-        lbu("t1", COMMAND_BYTE_OFF, car_reg),
+        lbu("t1", COMMAND_LEFT_BYTE_OFF, car_reg),
+        lbu("t0", COMMAND_RIGHT_BYTE_OFF, car_reg),
+        or_("t1", "t1", "t0"),
         beq("t1", "zero", "disabled"),
         nop(),
         lui("t0", 0x8005),
@@ -158,7 +168,9 @@ def make_siren_type_cave() -> bytes:
         lw("t0", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
         bne("s2", "t0", "skip"),
         nop(),
-        lbu("t0", COMMAND_BYTE_OFF, "s2"),
+        lbu("t0", COMMAND_LEFT_BYTE_OFF, "s2"),
+        lbu("t1", COMMAND_RIGHT_BYTE_OFF, "s2"),
+        or_("t0", "t0", "t1"),
         beq("t0", "zero", "skip"),
         nop(),
         "allow",
@@ -179,7 +191,9 @@ def make_siren_bit_cave() -> bytes:
         lw("t0", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
         bne("s2", "t0", "skip"),
         nop(),
-        lbu("t0", COMMAND_BYTE_OFF, "s2"),
+        lbu("t0", COMMAND_LEFT_BYTE_OFF, "s2"),
+        lbu("t1", COMMAND_RIGHT_BYTE_OFF, "s2"),
+        or_("t0", "t0", "t1"),
         beq("t0", "zero", "skip"),
         nop(),
         "allow",
@@ -235,6 +249,8 @@ def patch(exe: Path, *, revert: bool = False) -> None:
 
     known_light_gate_prefixes = {
         bytes.fromhex("00 00 09 24"),
+        bytes.fromhex("46 04 a9 92"),
+        bytes.fromhex("46 04 49 92"),
         bytes.fromhex("49 04 a9 92"),
         bytes.fromhex("49 04 49 92"),
     }
@@ -260,7 +276,8 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     expected_installed[0 : len(type_cave)] = type_cave
     bit_rel = SIREN_BIT_CAVE_OFF - cave_start
     expected_installed[bit_rel : bit_rel + len(bit_cave)] = bit_cave
-    if cave_now not in (bytes(cave_end - cave_start), bytes(expected_installed)):
+    old_installed_prefix = bytes.fromhex("08 00 40 14")
+    if cave_now not in (bytes(cave_end - cave_start), bytes(expected_installed)) and cave_now[:4] != old_installed_prefix:
         raise SystemExit(f"unexpected command special cave bytes: {cave_now[:16].hex(' ')}")
 
     if revert:
