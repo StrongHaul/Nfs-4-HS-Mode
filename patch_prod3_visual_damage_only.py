@@ -9,6 +9,7 @@ from pathlib import Path
 
 DEFAULT_EXE_GLOB = "PROD 3*/NFS4.EXE"
 RUNTIME_BASE = 0x8000F800
+CHEAT_FLAG_ADDR = 0x8011F204
 
 # Default-off cheat implementation. NFS4.EXE stays stock; the ON code patches
 # only RAM instructions that turn accumulated damage into weak engine/handling.
@@ -92,16 +93,42 @@ def print_cheats() -> None:
         print(line)
 
 
+def conditional_code(condition_value: int, write_line: str) -> list[str]:
+    addr, value = write_line.split()
+    compare_addr = 0xD0000000 | (CHEAT_FLAG_ADDR & 0x00FFFFFF)
+    return [f"{compare_addr:08X} {condition_value:04X}", f"{addr} {value}"]
+
+
+def print_conditional_cheat_section() -> None:
+    print("[Мои\\Damage только визуальный]")
+    print("Type = Gameshark")
+    print("Activation = EndFrame")
+    print("Option = Выкл:0")
+    print("Option = Вкл:1")
+    print(f"{CHEAT_FLAG_ADDR:08X} 000?")
+    for line in cheat_lines(patched=False):
+        for cond_line in conditional_code(0, line):
+            print(cond_line)
+    for line in cheat_lines(patched=True):
+        for cond_line in conditional_code(1, line):
+            print(cond_line)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="PROD3: emit default-off Gameshark codes for visual-only car damage."
     )
     parser.add_argument("--codes-only", action="store_true")
+    parser.add_argument("--conditional-section", action="store_true")
     args = parser.parse_args()
 
     exe = find_exe()
     data = exe.read_bytes()
     verify_default_off(data)
+    if args.conditional_section:
+        print_conditional_cheat_section()
+        return 0
+
     if not args.codes_only:
         print(f"NFS4.EXE {md5(data)}")
         print("visual damage only is default-off in the EXE")
