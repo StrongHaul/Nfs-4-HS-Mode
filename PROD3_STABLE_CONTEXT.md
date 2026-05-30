@@ -216,7 +216,7 @@ DrawC reverse mask hook:
 - В Raceway-картах добавлен стабильный traffic:
   - HP: 1 traffic + копы сохранены;
   - Single Race: traffic тоже работает.
-- В Single Race увеличена частота респавна traffic при включенном `80054B7C 0001`.
+- В Single Race и Hot Pursuit увеличена частота появления traffic при включенном `80054B7C 0001`: hook на roving-traffic release check сокращает порог выпуска до `5` кадров в SR и до `2` кадров в HP.
 - Трафик уступает/тормозит для не-traffic машин.
 
 ## FRONT.BIN

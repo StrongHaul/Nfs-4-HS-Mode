@@ -11,10 +11,10 @@ DEFAULT_EXE_GLOB = "PROD 3*/NFS4.EXE"
 BACKUP_SUFFIX = ".orig_before_prod3_single_race_traffic_respawn_cap"
 RUNTIME_BASE = 0x8000F800
 
-# Roving traffic release check. Stock reads AITune_MaxTraffic:
+# Roving traffic release check. Stock reads an AITune release interval:
 #   lw v0,0(v0)
 #   nop
-# then compares current live traffic count against v0.
+# then compares elapsed frames since the last traffic release against v0.
 HOOK_OFF = 0x62890
 RETURN_ADDR = RUNTIME_BASE + HOOK_OFF + 8
 
@@ -27,8 +27,8 @@ GAMESETUP_DATA_ADDR = 0x801144A4
 GAME_TYPE_OFF = 0x0000
 SINGLE_RACE_GAME_TYPE = 0
 HOT_PURSUIT_GAME_TYPE = 1
-MIN_SINGLE_RACE_TRAFFIC_CAP = 5
-MIN_HOT_PURSUIT_TRAFFIC_CAP = 2
+BOOSTED_SINGLE_RACE_RELEASE_INTERVAL = 5
+BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL = 2
 
 REG = {
     "zero": 0,
@@ -138,10 +138,10 @@ def cave(*, include_hot_pursuit: bool = True) -> bytes:
             lw("t1", GAME_TYPE_OFF, "t0"),
             bne("t1", "zero", "finish"),
             nop(),
-            slti("t1", "v0", MIN_SINGLE_RACE_TRAFFIC_CAP),
+            slti("t1", "v0", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
             beq("t1", "zero", "finish"),
             nop(),
-            addiu("v0", "zero", MIN_SINGLE_RACE_TRAFFIC_CAP),
+            addiu("v0", "zero", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
             "finish",
             j(RETURN_ADDR),
             nop(),
@@ -169,10 +169,10 @@ def cave(*, include_hot_pursuit: bool = True) -> bytes:
                 nop(),
                 # HP + enabled traffic cheat: let the second night traffic car
                 # leave purgatory. FRONT creates it with the normal traffic loop.
-                slti("t1", "v0", MIN_HOT_PURSUIT_TRAFFIC_CAP),
+                slti("t1", "v0", BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL),
                 beq("t1", "zero", "finish"),
                 nop(),
-                addiu("v0", "zero", MIN_HOT_PURSUIT_TRAFFIC_CAP),
+                addiu("v0", "zero", BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL),
                 beq("zero", "zero", "finish"),
                 nop(),
             ]
@@ -180,12 +180,13 @@ def cave(*, include_hot_pursuit: bool = True) -> bytes:
             else [bne("t1", "zero", "finish"), nop()]
         ),
         "single_race",
-        # Single Race + enabled Raceway/traffic cheat: let roving traffic keep
-        # up to the normal day cap even on night/dusk variants.
-        slti("t1", "v0", MIN_SINGLE_RACE_TRAFFIC_CAP),
+        # Single Race + enabled Raceway/traffic cheat: heavily shorten the
+        # roving traffic release interval, so replacement traffic appears much
+        # sooner after the live count drops.
+        slti("t1", "v0", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
         beq("t1", "zero", "finish"),
         nop(),
-        addiu("v0", "zero", MIN_SINGLE_RACE_TRAFFIC_CAP),
+        addiu("v0", "zero", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
         "finish",
         j(RETURN_ADDR),
         nop(),
@@ -205,7 +206,7 @@ def find_exe() -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="PROD3: raise Single Race traffic release cap when 80054B7C is enabled."
+        description="PROD3: shorten traffic release interval when 80054B7C is enabled."
     )
     parser.add_argument("--revert", action="store_true")
     args = parser.parse_args()
@@ -240,8 +241,8 @@ def main() -> int:
         exe.write_bytes(data)
 
     print(("reverted" if args.revert else "patched"), exe)
-    print("Single Race + 80054B7C: traffic release cap minimum = 5")
-    print("Hot Pursuit + 80054B7C: traffic release cap minimum = 2")
+    print("Single Race + 80054B7C: traffic release interval <= 5 frames")
+    print("Hot Pursuit + 80054B7C: traffic release interval <= 2 frames")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
