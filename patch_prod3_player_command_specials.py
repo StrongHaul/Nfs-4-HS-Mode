@@ -38,7 +38,7 @@ PLAYER_COMMAND_CASE11_GATE_OFF = 0x0835E0
 PLAYER_COMMAND_CIVILIAN_HAZARD_OFF = 0x083614
 SIREN_TYPE_CAVE_OFF = 0x45444
 SIREN_BIT_CAVE_OFF = 0x45484
-COMMAND_TOGGLE_CAVE_OFF = 0x454C0
+COMMAND_TOGGLE_CAVE_OFF = 0x454CC
 STROBE_CHECK_CAVE_OFF = 0x454F0
 OBJECT_CHECK_CAVE_OFF = 0x45540
 DRAW_CHECK_CAVE_OFF = 0x45590
@@ -181,10 +181,9 @@ def read_specials_state(result_reg: str) -> list[int]:
     ]
 
 
-def read_specials_state_with_reset(result_reg: str) -> list[int | str | tuple[str, str, str, str]]:
+def read_specials_state_with_reset(result_reg: str, car_reg: str) -> list[int | str | tuple[str, str, str, str]]:
     return [
-        lui("t0", (PLAYER_CAR_PTR_ADDR >> 16) & 0xFFFF),
-        lw("t1", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
+        or_("t1", car_reg, "zero"),
         lui("t0", (SPECIALS_LAST_PLAYER_ADDR >> 16) & 0xFFFF),
         lw("t2", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
         beq("t1", "t2", "same_player"),
@@ -201,9 +200,9 @@ def make_light_gate(*, cave_off: int) -> bytes:
     return padded(hook_bytes(cave_off), GATE_LEN)
 
 
-def make_light_check_cave(*, disabled_addr: int, return_addr: int) -> bytes:
+def make_light_check_cave(*, car_reg: str, disabled_addr: int, return_addr: int) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
-        *read_specials_state_with_reset("t1"),
+        *read_specials_state("t1"),
         beq("t1", "zero", "disabled"),
         nop(),
         lui("t0", 0x8005),
@@ -219,12 +218,9 @@ def make_light_check_cave(*, disabled_addr: int, return_addr: int) -> bytes:
 
 def make_siren_type_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
-        bne("v0", "zero", "allow"),
-        nop(),
         *read_specials_state("t1"),
         beq("t1", "zero", "skip"),
         nop(),
-        "allow",
         j(SIREN_TYPE_ALLOW_ADDR),
         nop(),
         "skip",
@@ -236,12 +232,9 @@ def make_siren_type_cave() -> bytes:
 
 def make_siren_bit_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
-        bne("v0", "zero", "allow"),
-        nop(),
         *read_specials_state("t1"),
         beq("t1", "zero", "skip"),
         nop(),
-        "allow",
         slti("v0", "s4", 4900),
         j(SIREN_BIT_ALLOW_ADDR),
         nop(),
@@ -256,14 +249,12 @@ def make_siren_bit_cave() -> bytes:
 def make_command_toggle_cave() -> bytes:
     items: list[int] = [
         lbu("v1", 0x447, "s0"),
-        lui("t0", (PLAYER_CAR_PTR_ADDR >> 16) & 0xFFFF),
-        lw("t2", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
         lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
         lbu("t1", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
         xori("t1", "t1", 1),
         andi("t1", "t1", 1),
         sb("t1", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
-        sw("t2", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
+        sw("s0", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
         j(COMMAND_TOGGLE_RETURN_ADDR),
         nop(),
     ]
@@ -303,14 +294,17 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         cave_off=DRAW_CHECK_CAVE_OFF,
     )
     strobe_check_cave = make_light_check_cave(
+        car_reg="s5",
         disabled_addr=STROBE_SKIP_ADDR,
         return_addr=STROBE_COUNTER_LOAD_RETURN_ADDR,
     )
     object_check_cave = make_light_check_cave(
+        car_reg="s5",
         disabled_addr=OBJECT_STOCK_ADDR,
         return_addr=OBJECT_COUNTER_LOAD_RETURN_ADDR,
     )
     draw_check_cave = make_light_check_cave(
+        car_reg="s2",
         disabled_addr=DRAW_STOCK_ADDR,
         return_addr=DRAW_COUNTER_LOAD_RETURN_ADDR,
     )
@@ -328,6 +322,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         bytes.fromhex("49 04 a9 92"),
         bytes.fromhex("49 04 49 92"),
         bytes.fromhex("05 80 08 3c"),
+        hook_bytes(0x454C0)[:4],
         hook_bytes(0x454E0)[:4],
         hook_bytes(0x454E4)[:4],
         hook_bytes(0x45530)[:4],
@@ -355,7 +350,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
 
     civilian_hazard_hook = bytes(data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8])
     command_toggle_patch = hook_bytes(COMMAND_TOGGLE_CAVE_OFF)
-    if civilian_hazard_hook not in (EXPECTED_CIVILIAN_HAZARD_HOOK, command_toggle_patch):
+    if civilian_hazard_hook not in (EXPECTED_CIVILIAN_HAZARD_HOOK, hook_bytes(0x454C0), command_toggle_patch):
         raise SystemExit(f"unexpected civilian hazard hook bytes: {civilian_hazard_hook.hex(' ')}")
 
     type_cave = make_siren_type_cave()
@@ -384,6 +379,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     draw_check_rel = DRAW_CHECK_CAVE_OFF - cave_start
     expected_installed[draw_check_rel : draw_check_rel + len(draw_check_cave)] = draw_check_cave
     old_installed_prefixes = {
+        bytes.fromhex("25 48 40 02"),
         bytes.fromhex("05 00 40 14"),
         bytes.fromhex("06 00 40 14"),
         bytes.fromhex("08 00 40 14"),
