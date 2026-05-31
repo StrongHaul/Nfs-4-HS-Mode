@@ -122,6 +122,10 @@ def lbu(rt: str, off: int, rs: str) -> int:
     return ins_i(0x24, REG[rs], REG[rt], off)
 
 
+def lhu(rt: str, off: int, rs: str) -> int:
+    return ins_i(0x25, REG[rs], REG[rt], off)
+
+
 def sb(rt: str, off: int, rs: str) -> int:
     return ins_i(0x28, REG[rs], REG[rt], off)
 
@@ -193,8 +197,8 @@ def make_light_gate(*, disabled_addr: int, return_addr: int) -> bytes:
 
 def read_specials_state(result_reg: str) -> list[int]:
     return [
-        lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
-        lbu(result_reg, SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
+        lui("t0", 0x8005),
+        lhu(result_reg, 0x5148, "t0"),
         andi(result_reg, result_reg, 1),
     ]
 
@@ -232,12 +236,15 @@ def make_siren_bit_cave() -> bytes:
 def make_command_toggle_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         lbu("v1", 0x447, "s0"),
-        lui("t0", 0x8005),
-        lbu("t1", 0x5148, "t0"),
-        xori("t1", "t1", 1),
-        andi("t1", "t1", 1),
-        lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
-        sb("t1", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
+        andi("t1", "v1", 0x18),
+        bne("t1", "zero", "turn_off"),
+        nop(),
+        addiu("t1", "zero", 1),
+        beq("zero", "zero", "write_state"),
+        nop(),
+        "turn_off",
+        addiu("t1", "zero", 0),
+        "write_state",
         lui("t0", 0x8005),
         sh("t1", 0x5148, "t0"),
         sh("t1", 0x517C, "t0"),
