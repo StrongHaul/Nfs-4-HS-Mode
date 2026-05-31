@@ -14,6 +14,8 @@ RUNTIME_BASE = 0x8000F800
 # L1+Down reaches the civilian hazard-light path at 0x80092E14. Keep the
 # stock hazard toggle intact, then mirror the command into the same code
 # immediates that the stable DuckStation light cheat already controlled.
+SPECIALS_COOLDOWN_OFF = 0x455E0
+SPECIALS_COOLDOWN_ADDR = RUNTIME_BASE + SPECIALS_COOLDOWN_OFF
 
 STROBE_GATE_OFF = 0x45948
 OBJECT_GATE_OFF = 0x4597C
@@ -237,6 +239,16 @@ def make_command_toggle_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         lbu("v1", 0x447, "s0"),
         lui("t0", 0x8005),
+        lbu("t2", SPECIALS_COOLDOWN_ADDR & 0xFFFF, "t0"),
+        beq("t2", "zero", "toggle"),
+        nop(),
+        addiu("t2", "t2", -1),
+        sb("t2", SPECIALS_COOLDOWN_ADDR & 0xFFFF, "t0"),
+        j(COMMAND_TOGGLE_RETURN_ADDR),
+        nop(),
+        "toggle",
+        addiu("t2", "zero", 20),
+        sb("t2", SPECIALS_COOLDOWN_ADDR & 0xFFFF, "t0"),
         lhu("t1", 0x5148, "t0"),
         xori("t1", "t1", 1),
         andi("t1", "t1", 1),
@@ -334,21 +346,15 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     if civilian_hazard_hook not in (EXPECTED_CIVILIAN_HAZARD_HOOK, hook_bytes(0x454C0), command_toggle_patch):
         raise SystemExit(f"unexpected civilian hazard hook bytes: {civilian_hazard_hook.hex(' ')}")
 
-    type_cave = make_siren_type_cave()
-    bit_cave = make_siren_bit_cave()
     command_toggle_cave = make_command_toggle_cave()
     cave_start = SIREN_TYPE_CAVE_OFF
     cave_end = max(
-        SIREN_TYPE_CAVE_OFF + len(type_cave),
-        SIREN_BIT_CAVE_OFF + len(bit_cave),
         COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave),
+        SPECIALS_COOLDOWN_OFF + 4,
         0x45580,
     )
     cave_now = bytes(data[cave_start:cave_end])
     expected_installed = bytearray(cave_end - cave_start)
-    expected_installed[0 : len(type_cave)] = type_cave
-    bit_rel = SIREN_BIT_CAVE_OFF - cave_start
-    expected_installed[bit_rel : bit_rel + len(bit_cave)] = bit_cave
     toggle_rel = COMMAND_TOGGLE_CAVE_OFF - cave_start
     expected_installed[toggle_rel : toggle_rel + len(command_toggle_cave)] = command_toggle_cave
     old_installed_prefixes = {
@@ -391,15 +397,14 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         data[STROBE_GATE_OFF : STROBE_GATE_OFF + GATE_LEN] = strobe_gate
         data[OBJECT_GATE_OFF : OBJECT_GATE_OFF + GATE_LEN] = object_gate
         data[DRAW_GATE_OFF : DRAW_GATE_OFF + GATE_LEN] = draw_gate
-        data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = type_patch
-        data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = bit_patch
+        data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = EXPECTED_SIREN_TYPE_HOOK
+        data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = EXPECTED_SIREN_BIT_HOOK
         data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = EXPECTED_CASE11_GATE
         data[PLAYER_COMMAND_DISPATCH_HOOK_OFF : PLAYER_COMMAND_DISPATCH_HOOK_OFF + 8] = EXPECTED_COMMAND_DISPATCH_HOOK
         data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8] = command_toggle_patch
         data[cave_start:cave_end] = bytes(cave_end - cave_start)
-        data[SIREN_TYPE_CAVE_OFF : SIREN_TYPE_CAVE_OFF + len(type_cave)] = type_cave
-        data[SIREN_BIT_CAVE_OFF : SIREN_BIT_CAVE_OFF + len(bit_cave)] = bit_cave
         data[COMMAND_TOGGLE_CAVE_OFF : COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave)] = command_toggle_cave
+        data[SPECIALS_COOLDOWN_OFF : SPECIALS_COOLDOWN_OFF + 4] = bytes(4)
 
     if bytes(data) != original:
         backup = exe.with_name(exe.name + BACKUP_SUFFIX)
