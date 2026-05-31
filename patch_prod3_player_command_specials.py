@@ -18,6 +18,7 @@ SPECIALS_LATCH_OFF = 0x455E0
 SPECIALS_LAST_PLAYER_OFF = 0x455E4
 SPECIALS_LATCH_ADDR = RUNTIME_BASE + SPECIALS_LATCH_OFF
 SPECIALS_LAST_PLAYER_ADDR = RUNTIME_BASE + SPECIALS_LAST_PLAYER_OFF
+PLAYER_CAR_PTR_ADDR = 0x80110D0C
 
 STROBE_GATE_OFF = 0x45948
 OBJECT_GATE_OFF = 0x4597C
@@ -39,7 +40,7 @@ PLAYER_COMMAND_CIVILIAN_HAZARD_OFF = 0x083614
 SIREN_TYPE_CAVE_OFF = 0x45444
 SIREN_BIT_CAVE_OFF = 0x45484
 COMMAND_TOGGLE_CAVE_OFF = 0x454CC
-COMMAND_LATCH_CLEAR_CAVE_OFF = 0x45510
+COMMAND_LATCH_CLEAR_CAVE_OFF = 0x45530
 
 SIREN_TYPE_ALLOW_ADDR = 0x8007655C
 SIREN_TYPE_SKIP_ADDR = 0x8007663C
@@ -242,6 +243,10 @@ def make_siren_bit_cave() -> bytes:
 def make_command_toggle_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         lbu("v1", 0x447, "s0"),
+        lui("t0", (PLAYER_CAR_PTR_ADDR >> 16) & 0xFFFF),
+        lw("t2", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
+        bne("s0", "t2", "return"),
+        nop(),
         lui("t0", (SPECIALS_LATCH_ADDR >> 16) & 0xFFFF),
         lbu("t2", SPECIALS_LATCH_ADDR & 0xFFFF, "t0"),
         bne("t2", "zero", "return"),
@@ -265,6 +270,10 @@ def make_command_toggle_cave() -> bytes:
 def make_latch_clear_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         lbu("v0", 0x44A, "s0"),
+        lui("t0", (PLAYER_CAR_PTR_ADDR >> 16) & 0xFFFF),
+        lw("t2", PLAYER_CAR_PTR_ADDR & 0xFFFF, "t0"),
+        bne("s0", "t2", "return"),
+        nop(),
         lui("t0", (SPECIALS_LAST_PLAYER_ADDR >> 16) & 0xFFFF),
         lw("t2", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
         beq("s0", "t2", "same_player"),
@@ -365,7 +374,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
 
     dispatch_hook = bytes(data[PLAYER_COMMAND_DISPATCH_HOOK_OFF : PLAYER_COMMAND_DISPATCH_HOOK_OFF + 8])
     dispatch_patch = hook_bytes(COMMAND_LATCH_CLEAR_CAVE_OFF)
-    if dispatch_hook not in (EXPECTED_COMMAND_DISPATCH_HOOK, dispatch_patch):
+    if dispatch_hook not in (EXPECTED_COMMAND_DISPATCH_HOOK, hook_bytes(0x45510), dispatch_patch):
         raise SystemExit(f"unexpected command dispatch hook bytes: {dispatch_hook.hex(' ')}")
 
     civilian_hazard_hook = bytes(data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8])
