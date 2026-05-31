@@ -12,13 +12,10 @@ BACKUP_SUFFIX = ".orig_before_prod3_player_command_specials"
 RUNTIME_BASE = 0x8000F800
 
 # L1+Down reaches the civilian hazard-light path at 0x80092E14. Keep the
-# stock hazard toggle intact, but also flip a private mod flag. The flag is
-# reset when the player car pointer changes, so it starts off in a new event.
+# stock hazard toggle intact, then mirror the command into the same code
+# immediates/branches that the stable DuckStation cheats already controlled.
 SPECIALS_STATE_OFF = 0x455E0
-SPECIALS_LAST_PLAYER_OFF = 0x455E4
 SPECIALS_STATE_ADDR = RUNTIME_BASE + SPECIALS_STATE_OFF
-SPECIALS_LAST_PLAYER_ADDR = RUNTIME_BASE + SPECIALS_LAST_PLAYER_OFF
-PLAYER_CAR_PTR_ADDR = 0x80110D0C
 
 STROBE_GATE_OFF = 0x45948
 OBJECT_GATE_OFF = 0x4597C
@@ -39,9 +36,6 @@ PLAYER_COMMAND_CIVILIAN_HAZARD_OFF = 0x083614
 SIREN_TYPE_CAVE_OFF = 0x45444
 SIREN_BIT_CAVE_OFF = 0x45484
 COMMAND_TOGGLE_CAVE_OFF = 0x454CC
-STROBE_CHECK_CAVE_OFF = 0x454F0
-OBJECT_CHECK_CAVE_OFF = 0x45540
-DRAW_CHECK_CAVE_OFF = 0x45590
 
 SIREN_TYPE_ALLOW_ADDR = 0x8007655C
 SIREN_TYPE_SKIP_ADDR = 0x8007663C
@@ -120,12 +114,20 @@ def andi(rt: str, rs: str, imm: int) -> int:
     return ins_i(0x0C, REG[rs], REG[rt], imm)
 
 
+def ori(rt: str, rs: str, imm: int) -> int:
+    return ins_i(0x0D, REG[rs], REG[rt], imm)
+
+
 def lbu(rt: str, off: int, rs: str) -> int:
     return ins_i(0x24, REG[rs], REG[rt], off)
 
 
 def sb(rt: str, off: int, rs: str) -> int:
     return ins_i(0x28, REG[rs], REG[rt], off)
+
+
+def sh(rt: str, off: int, rs: str) -> int:
+    return ins_i(0x29, REG[rs], REG[rt], off)
 
 
 def slti(rt: str, rs: str, imm: int) -> int:
@@ -173,36 +175,9 @@ def padded(blob: bytes, size: int) -> bytes:
     return blob + bytes(size - len(blob))
 
 
-def read_specials_state(result_reg: str) -> list[int]:
-    return [
-        lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
-        lbu(result_reg, SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
-        andi(result_reg, result_reg, 1),
-    ]
-
-
-def read_specials_state_with_reset(result_reg: str, car_reg: str) -> list[int | str | tuple[str, str, str, str]]:
-    return [
-        or_("t1", car_reg, "zero"),
-        lui("t0", (SPECIALS_LAST_PLAYER_ADDR >> 16) & 0xFFFF),
-        lw("t2", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
-        beq("t1", "t2", "same_player"),
-        nop(),
-        sw("t1", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
-        sb("zero", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
-        "same_player",
-        lbu(result_reg, SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
-        andi(result_reg, result_reg, 1),
-    ]
-
-
-def make_light_gate(*, cave_off: int) -> bytes:
-    return padded(hook_bytes(cave_off), GATE_LEN)
-
-
-def make_light_check_cave(*, car_reg: str, disabled_addr: int, return_addr: int) -> bytes:
+def make_light_gate(*, disabled_addr: int, return_addr: int) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
-        *read_specials_state("t1"),
+        addiu("t1", "zero", 0),
         beq("t1", "zero", "disabled"),
         nop(),
         lui("t0", 0x8005),
@@ -213,52 +188,40 @@ def make_light_check_cave(*, car_reg: str, disabled_addr: int, return_addr: int)
         j(disabled_addr),
         nop(),
     ]
-    return pack_labeled(items, 0)
-
-
-def make_siren_type_cave() -> bytes:
-    items: list[int | str | tuple[str, str, str, str]] = [
-        *read_specials_state("t1"),
-        beq("t1", "zero", "skip"),
-        nop(),
-        j(SIREN_TYPE_ALLOW_ADDR),
-        nop(),
-        "skip",
-        j(SIREN_TYPE_SKIP_ADDR),
-        nop(),
-    ]
-    return pack_labeled(items, runtime(SIREN_TYPE_CAVE_OFF))
-
-
-def make_siren_bit_cave() -> bytes:
-    items: list[int | str | tuple[str, str, str, str]] = [
-        *read_specials_state("t1"),
-        beq("t1", "zero", "skip"),
-        nop(),
-        slti("v0", "s4", 4900),
-        j(SIREN_BIT_ALLOW_ADDR),
-        nop(),
-        "skip",
-        slti("v0", "s4", 4900),
-        j(SIREN_BIT_SKIP_ADDR),
-        nop(),
-    ]
-    return pack_labeled(items, runtime(SIREN_BIT_CAVE_OFF))
+    return padded(pack_labeled(items, 0), GATE_LEN)
 
 
 def make_command_toggle_cave() -> bytes:
-    items: list[int] = [
+    items: list[int | str | tuple[str, str, str, str]] = [
         lbu("v1", 0x447, "s0"),
         lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
         lbu("t1", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
         xori("t1", "t1", 1),
         andi("t1", "t1", 1),
         sb("t1", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
-        sw("s0", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
+        lui("t0", 0x8005),
+        sh("t1", 0x5148, "t0"),
+        sh("t1", 0x517C, "t0"),
+        sh("t1", 0x51B0, "t0"),
+        beq("t1", "zero", "disable_siren"),
+        nop(),
+        lui("t0", 0x8007),
+        sw("zero", 0x6554, "t0"),
+        sw("zero", 0x6568, "t0"),
+        j(COMMAND_TOGGLE_RETURN_ADDR),
+        nop(),
+        "disable_siren",
+        lui("t0", 0x8007),
+        lui("t2", 0x1040),
+        ori("t2", "t2", 0x0039),
+        sw("t2", 0x6554, "t0"),
+        lui("t2", 0x1040),
+        ori("t2", "t2", 0x0025),
+        sw("t2", 0x6568, "t0"),
         j(COMMAND_TOGGLE_RETURN_ADDR),
         nop(),
     ]
-    return pack(items)
+    return pack_labeled(items, runtime(COMMAND_TOGGLE_CAVE_OFF))
 
 
 def hook_bytes(cave_off: int) -> bytes:
@@ -285,26 +248,14 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     draw_old = bytes(data[DRAW_GATE_OFF : DRAW_GATE_OFF + GATE_LEN])
 
     strobe_gate = make_light_gate(
-        cave_off=STROBE_CHECK_CAVE_OFF,
-    )
-    object_gate = make_light_gate(
-        cave_off=OBJECT_CHECK_CAVE_OFF,
-    )
-    draw_gate = make_light_gate(
-        cave_off=DRAW_CHECK_CAVE_OFF,
-    )
-    strobe_check_cave = make_light_check_cave(
-        car_reg="s5",
         disabled_addr=STROBE_SKIP_ADDR,
         return_addr=STROBE_COUNTER_LOAD_RETURN_ADDR,
     )
-    object_check_cave = make_light_check_cave(
-        car_reg="s5",
+    object_gate = make_light_gate(
         disabled_addr=OBJECT_STOCK_ADDR,
         return_addr=OBJECT_COUNTER_LOAD_RETURN_ADDR,
     )
-    draw_check_cave = make_light_check_cave(
-        car_reg="s2",
+    draw_gate = make_light_gate(
         disabled_addr=DRAW_STOCK_ADDR,
         return_addr=DRAW_COUNTER_LOAD_RETURN_ADDR,
     )
@@ -325,11 +276,11 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         hook_bytes(0x454C0)[:4],
         hook_bytes(0x454E0)[:4],
         hook_bytes(0x454E4)[:4],
+        hook_bytes(0x454F0)[:4],
         hook_bytes(0x45530)[:4],
+        hook_bytes(0x45540)[:4],
         hook_bytes(0x45580)[:4],
-        hook_bytes(STROBE_CHECK_CAVE_OFF)[:4],
-        hook_bytes(OBJECT_CHECK_CAVE_OFF)[:4],
-        hook_bytes(DRAW_CHECK_CAVE_OFF)[:4],
+        hook_bytes(0x45590)[:4],
     }
     for name, old in (("strobe", strobe_old), ("object", object_old), ("draw", draw_old)):
         if old[:4] not in known_light_gate_prefixes:
@@ -353,32 +304,18 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     if civilian_hazard_hook not in (EXPECTED_CIVILIAN_HAZARD_HOOK, hook_bytes(0x454C0), command_toggle_patch):
         raise SystemExit(f"unexpected civilian hazard hook bytes: {civilian_hazard_hook.hex(' ')}")
 
-    type_cave = make_siren_type_cave()
-    bit_cave = make_siren_bit_cave()
     command_toggle_cave = make_command_toggle_cave()
     cave_start = SIREN_TYPE_CAVE_OFF
     cave_end = max(
-        SIREN_BIT_CAVE_OFF + len(bit_cave),
         COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave),
-        STROBE_CHECK_CAVE_OFF + len(strobe_check_cave),
-        OBJECT_CHECK_CAVE_OFF + len(object_check_cave),
-        DRAW_CHECK_CAVE_OFF + len(draw_check_cave),
-        SPECIALS_LAST_PLAYER_OFF + 4,
+        SPECIALS_STATE_OFF + 4,
     )
     cave_now = bytes(data[cave_start:cave_end])
     expected_installed = bytearray(cave_end - cave_start)
-    expected_installed[0 : len(type_cave)] = type_cave
-    bit_rel = SIREN_BIT_CAVE_OFF - cave_start
-    expected_installed[bit_rel : bit_rel + len(bit_cave)] = bit_cave
     toggle_rel = COMMAND_TOGGLE_CAVE_OFF - cave_start
     expected_installed[toggle_rel : toggle_rel + len(command_toggle_cave)] = command_toggle_cave
-    strobe_check_rel = STROBE_CHECK_CAVE_OFF - cave_start
-    expected_installed[strobe_check_rel : strobe_check_rel + len(strobe_check_cave)] = strobe_check_cave
-    object_check_rel = OBJECT_CHECK_CAVE_OFF - cave_start
-    expected_installed[object_check_rel : object_check_rel + len(object_check_cave)] = object_check_cave
-    draw_check_rel = DRAW_CHECK_CAVE_OFF - cave_start
-    expected_installed[draw_check_rel : draw_check_rel + len(draw_check_cave)] = draw_check_cave
     old_installed_prefixes = {
+        bytes.fromhex("05 80 08 3c"),
         bytes.fromhex("25 48 40 02"),
         bytes.fromhex("05 00 40 14"),
         bytes.fromhex("06 00 40 14"),
@@ -416,20 +353,13 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         data[STROBE_GATE_OFF : STROBE_GATE_OFF + GATE_LEN] = strobe_gate
         data[OBJECT_GATE_OFF : OBJECT_GATE_OFF + GATE_LEN] = object_gate
         data[DRAW_GATE_OFF : DRAW_GATE_OFF + GATE_LEN] = draw_gate
-        data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = type_patch
-        data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = bit_patch
+        data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = EXPECTED_SIREN_TYPE_HOOK
+        data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = EXPECTED_SIREN_BIT_HOOK
         data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = EXPECTED_CASE11_GATE
         data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8] = command_toggle_patch
         data[cave_start:cave_end] = bytes(cave_end - cave_start)
-        data[SIREN_TYPE_CAVE_OFF : SIREN_TYPE_CAVE_OFF + len(type_cave)] = type_cave
-        data[SIREN_BIT_CAVE_OFF : SIREN_BIT_CAVE_OFF + len(bit_cave)] = bit_cave
         data[COMMAND_TOGGLE_CAVE_OFF : COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave)] = command_toggle_cave
-        data[STROBE_CHECK_CAVE_OFF : STROBE_CHECK_CAVE_OFF + len(strobe_check_cave)] = strobe_check_cave
-        data[OBJECT_CHECK_CAVE_OFF : OBJECT_CHECK_CAVE_OFF + len(object_check_cave)] = object_check_cave
-        data[DRAW_CHECK_CAVE_OFF : DRAW_CHECK_CAVE_OFF + len(draw_check_cave)] = draw_check_cave
-        data[SPECIALS_STATE_OFF : SPECIALS_LAST_PLAYER_OFF + 4] = bytes(
-            SPECIALS_LAST_PLAYER_OFF + 4 - SPECIALS_STATE_OFF
-        )
+        data[SPECIALS_STATE_OFF : SPECIALS_STATE_OFF + 4] = bytes(4)
 
     if bytes(data) != original:
         backup = exe.with_name(exe.name + BACKUP_SUFFIX)
