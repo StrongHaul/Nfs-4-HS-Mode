@@ -15,7 +15,9 @@ RUNTIME_BASE = 0x8000F800
 # stock hazard toggle intact, then mirror the command into the same code
 # immediates/branches that the stable DuckStation cheats already controlled.
 SPECIALS_STATE_OFF = 0x455E0
+SPECIALS_ENABLE_OFF = 0x455E2
 SPECIALS_STATE_ADDR = RUNTIME_BASE + SPECIALS_STATE_OFF
+SPECIALS_ENABLE_ADDR = RUNTIME_BASE + SPECIALS_ENABLE_OFF
 
 STROBE_GATE_OFF = 0x45948
 OBJECT_GATE_OFF = 0x4597C
@@ -122,6 +124,10 @@ def lbu(rt: str, off: int, rs: str) -> int:
     return ins_i(0x24, REG[rs], REG[rt], off)
 
 
+def lhu(rt: str, off: int, rs: str) -> int:
+    return ins_i(0x25, REG[rs], REG[rt], off)
+
+
 def sb(rt: str, off: int, rs: str) -> int:
     return ins_i(0x28, REG[rs], REG[rt], off)
 
@@ -136,6 +142,10 @@ def slti(rt: str, rs: str, imm: int) -> int:
 
 def xori(rt: str, rs: str, imm: int) -> int:
     return ins_i(0x0E, REG[rs], REG[rt], imm)
+
+
+def and_(rd: str, rs: str, rt: str) -> int:
+    return ins_r(REG[rs], REG[rt], REG[rd], 0, 0x24)
 
 
 def or_(rd: str, rs: str, rt: str) -> int:
@@ -193,9 +203,12 @@ def make_light_gate(*, disabled_addr: int, return_addr: int) -> bytes:
 
 def read_specials_state(result_reg: str) -> list[int]:
     return [
-        lui("t0", (SPECIALS_STATE_ADDR >> 16) & 0xFFFF),
-        lbu(result_reg, SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
+        lui("t0", (SPECIALS_ENABLE_ADDR >> 16) & 0xFFFF),
+        lhu(result_reg, SPECIALS_ENABLE_ADDR & 0xFFFF, "t0"),
         andi(result_reg, result_reg, 1),
+        lbu("t2", SPECIALS_STATE_ADDR & 0xFFFF, "t0"),
+        andi("t2", "t2", 1),
+        and_(result_reg, result_reg, "t2"),
     ]
 
 
@@ -232,6 +245,11 @@ def make_siren_bit_cave() -> bytes:
 def make_command_toggle_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         lbu("v1", 0x447, "s0"),
+        lui("t0", (SPECIALS_ENABLE_ADDR >> 16) & 0xFFFF),
+        lhu("t2", SPECIALS_ENABLE_ADDR & 0xFFFF, "t0"),
+        andi("t2", "t2", 1),
+        beq("t2", "zero", "return"),
+        nop(),
         lui("t0", 0x8005),
         lbu("t1", 0x5148, "t0"),
         xori("t1", "t1", 1),
@@ -242,6 +260,7 @@ def make_command_toggle_cave() -> bytes:
         sh("t1", 0x5148, "t0"),
         sh("t1", 0x517C, "t0"),
         sh("t1", 0x51B0, "t0"),
+        "return",
         j(COMMAND_TOGGLE_RETURN_ADDR),
         nop(),
     ]
@@ -336,7 +355,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         SIREN_TYPE_CAVE_OFF + len(type_cave),
         SIREN_BIT_CAVE_OFF + len(bit_cave),
         COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave),
-        SPECIALS_STATE_OFF + 4,
+        SPECIALS_ENABLE_OFF + 4,
     )
     cave_now = bytes(data[cave_start:cave_end])
     expected_installed = bytearray(cave_end - cave_start)
@@ -403,6 +422,9 @@ def patch(exe: Path, *, revert: bool = False) -> None:
 
     print(f"NFS4.EXE {md5(bytes(data))}")
     print("player civilian command specials:", "reverted" if revert else "patched")
+    if not revert:
+        print("cheat off: 80054DE2 0000")
+        print("cheat on:  80054DE2 0001")
 
 
 def main() -> int:
