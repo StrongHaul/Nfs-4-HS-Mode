@@ -14,8 +14,10 @@ RUNTIME_BASE = 0x8000F800
 # L1+Down reaches the civilian hazard-light path at 0x80092E14. Keep the
 # stock hazard toggle intact, then mirror the command into the same code
 # immediates/branches that the stable DuckStation cheats already controlled.
-SPECIALS_STATE_OFF = 0x455E0
-SPECIALS_STATE_ADDR = RUNTIME_BASE + SPECIALS_STATE_OFF
+SPECIALS_LATCH_OFF = 0x455E0
+SPECIALS_LAST_PLAYER_OFF = 0x455E4
+SPECIALS_LATCH_ADDR = RUNTIME_BASE + SPECIALS_LATCH_OFF
+SPECIALS_LAST_PLAYER_ADDR = RUNTIME_BASE + SPECIALS_LAST_PLAYER_OFF
 
 STROBE_GATE_OFF = 0x45948
 OBJECT_GATE_OFF = 0x4597C
@@ -32,20 +34,24 @@ DRAW_STOCK_ADDR = 0x800F78AC
 SIREN_TYPE_HOOK_OFF = 0x066D54
 SIREN_BIT_HOOK_OFF = 0x066D68
 PLAYER_COMMAND_CASE11_GATE_OFF = 0x0835E0
+PLAYER_COMMAND_DISPATCH_HOOK_OFF = 0x083464
 PLAYER_COMMAND_CIVILIAN_HAZARD_OFF = 0x083614
 SIREN_TYPE_CAVE_OFF = 0x45444
 SIREN_BIT_CAVE_OFF = 0x45484
 COMMAND_TOGGLE_CAVE_OFF = 0x454CC
+COMMAND_LATCH_CLEAR_CAVE_OFF = 0x45510
 
 SIREN_TYPE_ALLOW_ADDR = 0x8007655C
 SIREN_TYPE_SKIP_ADDR = 0x8007663C
 SIREN_BIT_ALLOW_ADDR = 0x80076570
 SIREN_BIT_SKIP_ADDR = 0x80076600
+COMMAND_DISPATCH_RETURN_ADDR = 0x80092C6C
 COMMAND_TOGGLE_RETURN_ADDR = 0x80092E1C
 
 EXPECTED_SIREN_TYPE_HOOK = bytes.fromhex("39 00 40 10 00 00 00 00")
 EXPECTED_SIREN_BIT_HOOK = bytes.fromhex("25 00 40 10 24 13 82 2a")
 EXPECTED_CASE11_GATE = bytes.fromhex("0c 00 40 10")
+EXPECTED_COMMAND_DISPATCH_HOOK = bytes.fromhex("4a 04 02 92 00 00 00 00")
 EXPECTED_CIVILIAN_HAZARD_HOOK = bytes.fromhex("47 04 03 92 00 00 00 00")
 
 REG = {
@@ -236,23 +242,50 @@ def make_siren_bit_cave() -> bytes:
 def make_command_toggle_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         lbu("v1", 0x447, "s0"),
-        andi("t1", "v1", 0x18),
-        bne("t1", "zero", "turn_off"),
+        lui("t0", (SPECIALS_LATCH_ADDR >> 16) & 0xFFFF),
+        lbu("t2", SPECIALS_LATCH_ADDR & 0xFFFF, "t0"),
+        bne("t2", "zero", "return"),
         nop(),
-        addiu("t1", "zero", 1),
-        beq("zero", "zero", "write_state"),
-        nop(),
-        "turn_off",
-        addiu("t1", "zero", 0),
-        "write_state",
+        addiu("t2", "zero", 1),
+        sb("t2", SPECIALS_LATCH_ADDR & 0xFFFF, "t0"),
         lui("t0", 0x8005),
+        lhu("t1", 0x5148, "t0"),
+        xori("t1", "t1", 1),
+        andi("t1", "t1", 1),
         sh("t1", 0x5148, "t0"),
         sh("t1", 0x517C, "t0"),
         sh("t1", 0x51B0, "t0"),
+        "return",
         j(COMMAND_TOGGLE_RETURN_ADDR),
         nop(),
     ]
     return pack_labeled(items, runtime(COMMAND_TOGGLE_CAVE_OFF))
+
+
+def make_latch_clear_cave() -> bytes:
+    items: list[int | str | tuple[str, str, str, str]] = [
+        lbu("v0", 0x44A, "s0"),
+        lui("t0", (SPECIALS_LAST_PLAYER_ADDR >> 16) & 0xFFFF),
+        lw("t2", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
+        beq("s0", "t2", "same_player"),
+        nop(),
+        sw("s0", SPECIALS_LAST_PLAYER_ADDR & 0xFFFF, "t0"),
+        sb("zero", SPECIALS_LATCH_ADDR & 0xFFFF, "t0"),
+        lui("t0", 0x8005),
+        sh("zero", 0x5148, "t0"),
+        sh("zero", 0x517C, "t0"),
+        sh("zero", 0x51B0, "t0"),
+        "same_player",
+        addiu("t1", "zero", 11),
+        beq("v0", "t1", "return"),
+        nop(),
+        lui("t0", (SPECIALS_LATCH_ADDR >> 16) & 0xFFFF),
+        sb("zero", SPECIALS_LATCH_ADDR & 0xFFFF, "t0"),
+        "return",
+        j(COMMAND_DISPATCH_RETURN_ADDR),
+        nop(),
+    ]
+    return pack_labeled(items, runtime(COMMAND_LATCH_CLEAR_CAVE_OFF))
 
 
 def hook_bytes(cave_off: int) -> bytes:
@@ -330,6 +363,11 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     if case11_gate not in (EXPECTED_CASE11_GATE, bytes(4)):
         raise SystemExit(f"unexpected case 11 command gate bytes: {case11_gate.hex(' ')}")
 
+    dispatch_hook = bytes(data[PLAYER_COMMAND_DISPATCH_HOOK_OFF : PLAYER_COMMAND_DISPATCH_HOOK_OFF + 8])
+    dispatch_patch = hook_bytes(COMMAND_LATCH_CLEAR_CAVE_OFF)
+    if dispatch_hook not in (EXPECTED_COMMAND_DISPATCH_HOOK, dispatch_patch):
+        raise SystemExit(f"unexpected command dispatch hook bytes: {dispatch_hook.hex(' ')}")
+
     civilian_hazard_hook = bytes(data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8])
     command_toggle_patch = hook_bytes(COMMAND_TOGGLE_CAVE_OFF)
     if civilian_hazard_hook not in (EXPECTED_CIVILIAN_HAZARD_HOOK, hook_bytes(0x454C0), command_toggle_patch):
@@ -338,12 +376,14 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     type_cave = make_siren_type_cave()
     bit_cave = make_siren_bit_cave()
     command_toggle_cave = make_command_toggle_cave()
+    latch_clear_cave = make_latch_clear_cave()
     cave_start = SIREN_TYPE_CAVE_OFF
     cave_end = max(
         SIREN_TYPE_CAVE_OFF + len(type_cave),
         SIREN_BIT_CAVE_OFF + len(bit_cave),
         COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave),
-        SPECIALS_STATE_OFF + 4,
+        COMMAND_LATCH_CLEAR_CAVE_OFF + len(latch_clear_cave),
+        SPECIALS_LAST_PLAYER_OFF + 4,
     )
     cave_now = bytes(data[cave_start:cave_end])
     expected_installed = bytearray(cave_end - cave_start)
@@ -352,6 +392,8 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     expected_installed[bit_rel : bit_rel + len(bit_cave)] = bit_cave
     toggle_rel = COMMAND_TOGGLE_CAVE_OFF - cave_start
     expected_installed[toggle_rel : toggle_rel + len(command_toggle_cave)] = command_toggle_cave
+    latch_rel = COMMAND_LATCH_CLEAR_CAVE_OFF - cave_start
+    expected_installed[latch_rel : latch_rel + len(latch_clear_cave)] = latch_clear_cave
     old_installed_prefixes = {
         bytes.fromhex("00 00 00 00"),
         bytes.fromhex("05 80 08 3c"),
@@ -386,6 +428,7 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = EXPECTED_SIREN_TYPE_HOOK
         data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = EXPECTED_SIREN_BIT_HOOK
         data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = EXPECTED_CASE11_GATE
+        data[PLAYER_COMMAND_DISPATCH_HOOK_OFF : PLAYER_COMMAND_DISPATCH_HOOK_OFF + 8] = EXPECTED_COMMAND_DISPATCH_HOOK
         data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8] = EXPECTED_CIVILIAN_HAZARD_HOOK
         data[cave_start:cave_end] = bytes(cave_end - cave_start)
     else:
@@ -395,12 +438,16 @@ def patch(exe: Path, *, revert: bool = False) -> None:
         data[SIREN_TYPE_HOOK_OFF : SIREN_TYPE_HOOK_OFF + 8] = type_patch
         data[SIREN_BIT_HOOK_OFF : SIREN_BIT_HOOK_OFF + 8] = bit_patch
         data[PLAYER_COMMAND_CASE11_GATE_OFF : PLAYER_COMMAND_CASE11_GATE_OFF + 4] = EXPECTED_CASE11_GATE
+        data[PLAYER_COMMAND_DISPATCH_HOOK_OFF : PLAYER_COMMAND_DISPATCH_HOOK_OFF + 8] = dispatch_patch
         data[PLAYER_COMMAND_CIVILIAN_HAZARD_OFF : PLAYER_COMMAND_CIVILIAN_HAZARD_OFF + 8] = command_toggle_patch
         data[cave_start:cave_end] = bytes(cave_end - cave_start)
         data[SIREN_TYPE_CAVE_OFF : SIREN_TYPE_CAVE_OFF + len(type_cave)] = type_cave
         data[SIREN_BIT_CAVE_OFF : SIREN_BIT_CAVE_OFF + len(bit_cave)] = bit_cave
         data[COMMAND_TOGGLE_CAVE_OFF : COMMAND_TOGGLE_CAVE_OFF + len(command_toggle_cave)] = command_toggle_cave
-        data[SPECIALS_STATE_OFF : SPECIALS_STATE_OFF + 4] = bytes(4)
+        data[COMMAND_LATCH_CLEAR_CAVE_OFF : COMMAND_LATCH_CLEAR_CAVE_OFF + len(latch_clear_cave)] = latch_clear_cave
+        data[SPECIALS_LATCH_OFF : SPECIALS_LAST_PLAYER_OFF + 4] = bytes(
+            SPECIALS_LAST_PLAYER_OFF + 4 - SPECIALS_LATCH_OFF
+        )
 
     if bytes(data) != original:
         backup = exe.with_name(exe.name + BACKUP_SUFFIX)
