@@ -20,6 +20,7 @@ SIREN_BIT_CAVE_OFF = 0x45484
 
 SIREN_TYPE_ALLOW_ADDR = 0x8007655C
 SIREN_TYPE_SKIP_ADDR = 0x8007663C
+SIREN_OFF_PATH_ADDR = 0x8007660C
 SIREN_BIT_ALLOW_ADDR = 0x80076570
 SIREN_BIT_SKIP_ADDR = 0x80076600
 
@@ -150,8 +151,8 @@ def make_siren_type_cave() -> bytes:
         *read_cheat_flag(),
         bne("t1", "zero", "allow"),
         nop(),
-        "skip",
-        j(SIREN_TYPE_SKIP_ADDR),
+        "force_off",
+        j(SIREN_OFF_PATH_ADDR),
         nop(),
         "allow",
         j(SIREN_TYPE_ALLOW_ADDR),
@@ -220,7 +221,10 @@ def patch(exe: Path, *, revert: bool = False) -> None:
     expected[0 : len(type_cave)] = type_cave
     bit_rel = SIREN_BIT_CAVE_OFF - cave_start
     expected[bit_rel : bit_rel + len(bit_cave)] = bit_cave
-    if cave_now not in (bytes(cave_end - cave_start), bytes(expected)) and cave_now[:4] != bytes(4):
+    if (
+        cave_now not in (bytes(cave_end - cave_start), bytes(expected))
+        and cave_now[:4] not in (bytes(4), expected[:4])
+    ):
         raise SystemExit(f"unexpected siren cave bytes: {cave_now[:16].hex(' ')}")
 
     if revert:
