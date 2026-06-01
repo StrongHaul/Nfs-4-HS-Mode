@@ -260,7 +260,8 @@ DrawC reverse mask hook:
 - В Raceway-картах добавлен стабильный traffic:
   - HP: 1 traffic + копы сохранены;
   - Single Race: traffic тоже работает.
-- В Single Race и Hot Pursuit увеличена частота появления traffic при включенном `80054B7C 0001`: hook на roving-traffic release check сокращает порог выпуска до `5` кадров в SR и до `2` кадров в HP.
+- В Single Race, Hot Pursuit и Tournament увеличена частота появления traffic при включенном `80054B7C 0001`: hook на roving-traffic release check сокращает порог выпуска до `5` кадров в SR и до `2` кадров в HP/Tournament.
+- В Tournament этот же cheat-path участвует в составе гонки: если турнир уже создал 1-2 traffic-слота и в `GameSetup` есть свободные carData-слоты, runtime hook дозаполняет traffic до 3 машин, не трогая гонщиков.
 - Трафик уступает/тормозит для не-traffic машин.
 
 ## Damage только визуальный

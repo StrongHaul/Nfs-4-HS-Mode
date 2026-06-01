@@ -18,17 +18,22 @@ RUNTIME_BASE = 0x8000F800
 HOOK_OFF = 0x62890
 RETURN_ADDR = RUNTIME_BASE + HOOK_OFF + 8
 
-# Free space before the player cop light-color cave at 0x45400.
-CAVE_OFF = 0x45380
-CAVE_LEN = 0x80
+# Larger free space after the player cop light-color cave at 0x45400.
+# The old SR/HP-only version used 0x45380..0x453FF.
+OLD_CAVE_OFF = 0x45380
+OLD_CAVE_LEN = 0x80
+CAVE_OFF = 0x45500
+CAVE_LEN = 0x100
 
 ENABLE_ADDR = 0x80054B7C
 GAMESETUP_DATA_ADDR = 0x801144A4
 GAME_TYPE_OFF = 0x0000
 SINGLE_RACE_GAME_TYPE = 0
 HOT_PURSUIT_GAME_TYPE = 1
+TOURNAMENT_GAME_TYPE = 2
 BOOSTED_SINGLE_RACE_RELEASE_INTERVAL = 5
 BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL = 2
+BOOSTED_TOURNAMENT_RELEASE_INTERVAL = 2
 
 REG = {
     "zero": 0,
@@ -125,8 +130,8 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def cave(*, include_hot_pursuit: bool = True) -> bytes:
-    if not include_hot_pursuit:
+def cave(*, include_hot_pursuit: bool = True, include_tournament: bool = True) -> bytes:
+    if not include_hot_pursuit and not include_tournament:
         items: list[int | str | tuple[str, str, str, str]] = [
             # Legacy SR-only version.
             lui("t0", hi(ENABLE_ADDR)),
@@ -165,7 +170,27 @@ def cave(*, include_hot_pursuit: bool = True) -> bytes:
         *(
             [
                 addiu("t1", "t1", -HOT_PURSUIT_GAME_TYPE),
-                bne("t1", "zero", "finish"),
+                beq("t1", "zero", "hot_pursuit"),
+                nop(),
+                *(
+                    [
+                        addiu("t1", "t1", -(TOURNAMENT_GAME_TYPE - HOT_PURSUIT_GAME_TYPE)),
+                        bne("t1", "zero", "finish"),
+                        nop(),
+                        # Tournament + enabled traffic cheat: match the HP
+                        # release interval so the frontend-created traffic
+                        # leaves purgatory aggressively.
+                        slti("t1", "v0", BOOSTED_TOURNAMENT_RELEASE_INTERVAL),
+                        beq("t1", "zero", "finish"),
+                        nop(),
+                        addiu("v0", "zero", BOOSTED_TOURNAMENT_RELEASE_INTERVAL),
+                        beq("zero", "zero", "finish"),
+                        nop(),
+                    ]
+                    if include_tournament
+                    else [bne("t1", "zero", "finish"), nop()]
+                ),
+                "hot_pursuit",
                 nop(),
                 # HP + enabled traffic cheat: let the second night traffic car
                 # leave purgatory. FRONT creates it with the normal traffic loop.
@@ -217,21 +242,35 @@ def main() -> int:
 
     stock_hook = pack([lw("v0", 0, "v0"), nop()])
     patched_hook = pack([j(runtime(CAVE_OFF)), lw("v0", 0, "v0")])
+    old_patched_hook = pack([j(runtime(OLD_CAVE_OFF)), lw("v0", 0, "v0")])
     current_hook = bytes(data[HOOK_OFF : HOOK_OFF + 8])
-    if current_hook not in {stock_hook, patched_hook}:
+    if current_hook not in {stock_hook, patched_hook, old_patched_hook}:
         raise SystemExit(f"unexpected hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     blob = cave()
-    previous_blob = cave(include_hot_pursuit=False)
+    previous_blob = cave(include_hot_pursuit=False, include_tournament=False)
+    previous_hp_blob = cave(include_tournament=False)
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {b"\x00" * CAVE_LEN, blob, previous_blob}:
+    if current_cave not in {b"\x00" * CAVE_LEN, blob, previous_hp_blob}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}: {current_cave[:16].hex(' ')}")
+
+    current_old_cave = bytes(data[OLD_CAVE_OFF : OLD_CAVE_OFF + OLD_CAVE_LEN])
+    if (
+        current_old_cave
+        not in {b"\x00" * OLD_CAVE_LEN, previous_blob, previous_hp_blob[:OLD_CAVE_LEN]}
+        and current_hook != old_patched_hook
+    ):
+        raise SystemExit(
+            f"old cave is not empty/known at 0x{OLD_CAVE_OFF:X}: {current_old_cave[:16].hex(' ')}"
+        )
 
     if args.revert:
         data[HOOK_OFF : HOOK_OFF + 8] = stock_hook
         data[CAVE_OFF : CAVE_OFF + CAVE_LEN] = b"\x00" * CAVE_LEN
+        data[OLD_CAVE_OFF : OLD_CAVE_OFF + OLD_CAVE_LEN] = b"\x00" * OLD_CAVE_LEN
     else:
         data[CAVE_OFF : CAVE_OFF + CAVE_LEN] = blob
+        data[OLD_CAVE_OFF : OLD_CAVE_OFF + OLD_CAVE_LEN] = b"\x00" * OLD_CAVE_LEN
         data[HOOK_OFF : HOOK_OFF + 8] = patched_hook
 
     if bytes(data) != original:
@@ -243,6 +282,7 @@ def main() -> int:
     print(("reverted" if args.revert else "patched"), exe)
     print("Single Race + 80054B7C: traffic release interval <= 5 frames")
     print("Hot Pursuit + 80054B7C: traffic release interval <= 2 frames")
+    print("Tournament + 80054B7C: traffic release interval <= 2 frames")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
