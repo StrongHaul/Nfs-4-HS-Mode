@@ -26,7 +26,7 @@ LIMIT_CONTINUE_ADDR = RUNTIME_BASE + 0x1854C
 CAVE_OFF = 0x43180
 CAVE_LEN = 0x100
 ENABLE_ADDR = 0x80054B7C
-FRONTEND_GAME_MODE_ADDR = 0x801158BB
+FRONTEND_TIER_ADDR = 0x80115922
 
 STOCK_ALLOW_HOOK = bytes.fromhex("2f 00 40 10 21 88 00 00")
 STOCK_LIMIT_HOOK = bytes.fromhex("03 00 15 24 21 10 20 02")
@@ -139,13 +139,14 @@ def cave() -> tuple[bytes, int, int]:
         nop(),
         "limit_entry",
         # Hook delay already executes stock: addiu s5,zero,3.
-        # Only the cheat can reduce HP Tournament's traffic cap to 1.
+        # Special-event/HP tournaments set frontEnd.tier to 1 and already use
+        # player + 3 racers + 4 cops. Cap them to one traffic car.
         lui("t0", hi(ENABLE_ADDR)),
         lhu("t0", lo(ENABLE_ADDR), "t0"),
         beq("t0", "zero", "limit_done"),
         nop(),
-        lui("t0", hi(FRONTEND_GAME_MODE_ADDR)),
-        lbu("t0", lo(FRONTEND_GAME_MODE_ADDR), "t0"),
+        lui("t0", hi(FRONTEND_TIER_ADDR)),
+        lbu("t0", lo(FRONTEND_TIER_ADDR), "t0"),
         addiu("t1", "zero", 1),
         bne("t0", "t1", "limit_done"),
         nop(),
@@ -204,7 +205,7 @@ def main() -> int:
         )
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {b"\x00" * CAVE_LEN, blob}:
+    if current_cave not in {b"\x00" * CAVE_LEN, blob} and current_allow != allow_hook:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}")
 
     if args.revert:
@@ -224,7 +225,7 @@ def main() -> int:
 
     print(("reverted" if args.revert else "patched"), front)
     print("Tournament + 80054B7C: force frontend traffic on")
-    print("Tournament max traffic: normal=3, HP gameMode=1")
+    print("Tournament max traffic: tier0=3, tier1/special-event=1")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
