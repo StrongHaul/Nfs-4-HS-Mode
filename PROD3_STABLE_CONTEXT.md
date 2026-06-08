@@ -263,7 +263,7 @@ DrawC reverse mask hook:
 - В Single Race и Hot Pursuit увеличена частота появления traffic при включенном `80054B7C 0001`: hook на roving-traffic release check сокращает порог выпуска до `5` кадров в SR и до `2` кадров в HP.
 - В Tournament чит `80054B7C 0001` принудительно включает frontend traffic даже для турниров, где `fTraffic == 0`:
   - обычный Tournament: до 3 traffic-машин;
-  - HP Tournament (`frontEnd.gameMode == 1`): 1 traffic-машина, чтобы итоговый состав `игрок + 3 ИИ + 4 копа + 1 traffic` не превышал лимит 9 машин.
+  - HP/special-event Tournament (`tournamentManager.fTier == 1`): 1 traffic-машина, чтобы итоговый состав `игрок + 3 ИИ + 4 копа + 1 traffic` не превышал лимит 9 машин.
 - Для Tournament этот же release-check сокращает порог выпуска traffic до `2` кадров.
 - Трафик уступает/тормозит для не-traffic машин.
 
