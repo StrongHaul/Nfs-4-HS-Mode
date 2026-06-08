@@ -26,8 +26,7 @@ LIMIT_CONTINUE_ADDR = RUNTIME_BASE + 0x1854C
 CAVE_OFF = 0x43180
 CAVE_LEN = 0x100
 ENABLE_ADDR = 0x80054B7C
-TOURNAMENT_MANAGER_ADDR = 0x80114AD8
-TOURNAMENT_MANAGER_TIER_OFF = 0x0004
+FRONTEND_GAME_MODE_ADDR = 0x801158BB
 
 STOCK_ALLOW_HOOK = bytes.fromhex("2f 00 40 10 21 88 00 00")
 STOCK_LIMIT_HOOK = bytes.fromhex("03 00 15 24 21 10 20 02")
@@ -85,10 +84,6 @@ def lhu(rt: str, off: int, rs: str) -> int:
     return ins_i(0x25, REG[rs], REG[rt], off)
 
 
-def lw(rt: str, off: int, rs: str) -> int:
-    return ins_i(0x23, REG[rs], REG[rt], off)
-
-
 def nop() -> int:
     return 0
 
@@ -144,14 +139,13 @@ def cave() -> tuple[bytes, int, int]:
         nop(),
         "limit_entry",
         # Hook delay already executes stock: addiu s5,zero,3.
-        # Special-event/HP tournaments are tier 1, and already use a dense
-        # player + 3 racers + 4 cops composition. Cap them to one traffic car.
+        # Only the cheat can reduce HP Tournament's traffic cap to 1.
         lui("t0", hi(ENABLE_ADDR)),
         lhu("t0", lo(ENABLE_ADDR), "t0"),
         beq("t0", "zero", "limit_done"),
         nop(),
-        lui("t0", hi(TOURNAMENT_MANAGER_ADDR)),
-        lw("t0", lo(TOURNAMENT_MANAGER_ADDR) + TOURNAMENT_MANAGER_TIER_OFF, "t0"),
+        lui("t0", hi(FRONTEND_GAME_MODE_ADDR)),
+        lbu("t0", lo(FRONTEND_GAME_MODE_ADDR), "t0"),
         addiu("t1", "zero", 1),
         bne("t0", "t1", "limit_done"),
         nop(),
@@ -210,7 +204,7 @@ def main() -> int:
         )
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {b"\x00" * CAVE_LEN, blob} and current_allow != allow_hook:
+    if current_cave not in {b"\x00" * CAVE_LEN, blob}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}")
 
     if args.revert:
@@ -230,7 +224,7 @@ def main() -> int:
 
     print(("reverted" if args.revert else "patched"), front)
     print("Tournament + 80054B7C: force frontend traffic on")
-    print("Tournament max traffic: tier0=3, tier1/special-event=1")
+    print("Tournament max traffic: normal=3, HP gameMode=1")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
