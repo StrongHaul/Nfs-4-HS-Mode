@@ -23,10 +23,16 @@ ALLOW_SKIP_ADDR = RUNTIME_BASE + 0x185F0
 LIMIT_HOOK_OFF = 0x18548
 LIMIT_CONTINUE_ADDR = RUNTIME_BASE + 0x1854C
 
-CAVE_OFF = 0x43180
+# Keep the cave at the end of FRONT.BIN's loaded segment. The older 0x43180
+# slot overlaps frontend traffic globals at runtime (0x80053180+) and can
+# corrupt cold Tournament startup.
+CAVE_OFF = 0x44800
 CAVE_LEN = 0x100
+OLD_DATA_CAVE_OFF = 0x43180
+OLD_DATA_CAVE_LEN = 0x100
 ENABLE_ADDR = 0x80054B7C
 FRONTEND_TIER_ADDR = 0x80115922
+OLD_FRONTEND_GAME_MODE_ADDR = 0x801158BB
 
 STOCK_ALLOW_HOOK = bytes.fromhex("2f 00 40 10 21 88 00 00")
 STOCK_LIMIT_HOOK = bytes.fromhex("03 00 15 24 21 10 20 02")
@@ -119,7 +125,7 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def cave() -> tuple[bytes, int, int]:
+def cave(cave_off: int = CAVE_OFF, frontend_tier_addr: int = FRONTEND_TIER_ADDR) -> tuple[bytes, int, int]:
     items: list[int | str | tuple[str, str, str, str]] = [
         "allow_entry",
         # Hook delay already executes stock: addu s1,zero,zero.
@@ -145,8 +151,8 @@ def cave() -> tuple[bytes, int, int]:
         lhu("t0", lo(ENABLE_ADDR), "t0"),
         beq("t0", "zero", "limit_done"),
         nop(),
-        lui("t0", hi(FRONTEND_TIER_ADDR)),
-        lbu("t0", lo(FRONTEND_TIER_ADDR), "t0"),
+        lui("t0", hi(frontend_tier_addr)),
+        lbu("t0", lo(frontend_tier_addr), "t0"),
         addiu("t1", "zero", 1),
         bne("t0", "t1", "limit_done"),
         nop(),
@@ -155,12 +161,12 @@ def cave() -> tuple[bytes, int, int]:
         j(LIMIT_CONTINUE_ADDR),
         nop(),
     ]
-    blob = pack_labeled(items, runtime(CAVE_OFF))
+    blob = pack_labeled(items, runtime(cave_off))
     if len(blob) > CAVE_LEN:
         raise SystemExit(f"cave too large: 0x{len(blob):X} > 0x{CAVE_LEN:X}")
 
     # Compute label offsets for hook targets.
-    pc = runtime(CAVE_OFF)
+    pc = runtime(cave_off)
     labels: dict[str, int] = {}
     for item in items:
         if isinstance(item, str):
@@ -189,31 +195,54 @@ def main() -> int:
     data = bytearray(original)
 
     blob, allow_addr, limit_addr = cave()
+    old_tier_blob, old_tier_allow_addr, old_tier_limit_addr = cave(
+        OLD_DATA_CAVE_OFF, FRONTEND_TIER_ADDR
+    )
+    old_game_mode_blob, old_game_mode_allow_addr, old_game_mode_limit_addr = cave(
+        OLD_DATA_CAVE_OFF, OLD_FRONTEND_GAME_MODE_ADDR
+    )
     allow_hook = pack([j(allow_addr), 0x00008821])  # addu s1,zero,zero
     limit_hook = pack([j(limit_addr), addiu("s5", "zero", 3)])
+    old_tier_allow_hook = pack([j(old_tier_allow_addr), 0x00008821])
+    old_tier_limit_hook = pack([j(old_tier_limit_addr), addiu("s5", "zero", 3)])
+    old_game_mode_allow_hook = pack([j(old_game_mode_allow_addr), 0x00008821])
+    old_game_mode_limit_hook = pack([j(old_game_mode_limit_addr), addiu("s5", "zero", 3)])
+    old_allow_hooks = {old_tier_allow_hook, old_game_mode_allow_hook}
+    old_limit_hooks = {old_tier_limit_hook, old_game_mode_limit_hook}
+    old_blobs = {old_tier_blob, old_game_mode_blob}
 
     current_allow = bytes(data[ALLOW_HOOK_OFF : ALLOW_HOOK_OFF + 8])
-    if current_allow not in {STOCK_ALLOW_HOOK, allow_hook}:
+    if current_allow not in {STOCK_ALLOW_HOOK, allow_hook, *old_allow_hooks}:
         raise SystemExit(
             f"unexpected allow hook bytes at 0x{ALLOW_HOOK_OFF:X}: {current_allow.hex(' ')}"
         )
 
     current_limit = bytes(data[LIMIT_HOOK_OFF : LIMIT_HOOK_OFF + 8])
-    if current_limit not in {STOCK_LIMIT_HOOK, limit_hook}:
+    if current_limit not in {STOCK_LIMIT_HOOK, limit_hook, *old_limit_hooks}:
         raise SystemExit(
             f"unexpected limit hook bytes at 0x{LIMIT_HOOK_OFF:X}: {current_limit.hex(' ')}"
         )
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {b"\x00" * CAVE_LEN, blob} and current_allow != allow_hook:
+    if current_cave not in {b"\x00" * CAVE_LEN, blob}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}")
+
+    current_old_cave = bytes(data[OLD_DATA_CAVE_OFF : OLD_DATA_CAVE_OFF + OLD_DATA_CAVE_LEN])
+    if current_old_cave not in {b"\x00" * OLD_DATA_CAVE_LEN, *old_blobs}:
+        raise SystemExit(f"old data cave is not empty/known at 0x{OLD_DATA_CAVE_OFF:X}")
 
     if args.revert:
         data[ALLOW_HOOK_OFF : ALLOW_HOOK_OFF + 8] = STOCK_ALLOW_HOOK
         data[LIMIT_HOOK_OFF : LIMIT_HOOK_OFF + 8] = STOCK_LIMIT_HOOK
         data[CAVE_OFF : CAVE_OFF + CAVE_LEN] = b"\x00" * CAVE_LEN
+        data[OLD_DATA_CAVE_OFF : OLD_DATA_CAVE_OFF + OLD_DATA_CAVE_LEN] = (
+            b"\x00" * OLD_DATA_CAVE_LEN
+        )
     else:
         data[CAVE_OFF : CAVE_OFF + CAVE_LEN] = blob
+        data[OLD_DATA_CAVE_OFF : OLD_DATA_CAVE_OFF + OLD_DATA_CAVE_LEN] = (
+            b"\x00" * OLD_DATA_CAVE_LEN
+        )
         data[ALLOW_HOOK_OFF : ALLOW_HOOK_OFF + 8] = allow_hook
         data[LIMIT_HOOK_OFF : LIMIT_HOOK_OFF + 8] = limit_hook
 
