@@ -44,7 +44,6 @@ AI_RACER_FLAG = 0x0002
 COP_FLAG = 0x0018
 MAX_CARS = 9
 TARGET_TRAFFIC = 3
-TOURNAMENT_GAME_TYPE = 2
 SR_FULL_GRID_COP_ID = 0x0018
 SR_FULL_GRID_TRAFFIC_ID = 0x002C
 RACEWAY_COP_SOURCE_SLOT_OFF = CAR_DATA_ARRAY_OFF + (2 * CAR_DATA_SIZE)
@@ -218,9 +217,6 @@ def cave() -> bytes:
         addiu("t2", "zero", 1),
         beq("t1", "t2", "mode_ok"),
         nop(),
-        addiu("t2", "zero", TOURNAMENT_GAME_TYPE),
-        beq("t1", "t2", "mode_ok"),
-        nop(),
         addiu("t2", "zero", 5),
         bne("t1", "t2", "done"),
         nop(),
@@ -271,14 +267,6 @@ def cave() -> bytes:
         nop(),
         addiu("t6", "zero", 5),
         beq("v1", "t6", "raceway_fixed_slots"),
-        nop(),
-        addiu("t6", "zero", TOURNAMENT_GAME_TYPE),
-        bne("v1", "t6", "raceway_single_race_traffic"),
-        nop(),
-        # Ordinary Tournament Raceway starts with six race cars; HP
-        # Tournament already has eight cars (racers + cops), so keep it stable.
-        slti("t6", "t1", 8),
-        beq("t6", "zero", "done"),
         nop(),
         "raceway_single_race_traffic",
         slti("t6", "t1", MAX_CARS),
@@ -748,10 +736,7 @@ def main() -> int:
     print(f"hook runtime 0x{runtime(CARS_STARTUP_HOOK_OFF):08X} -> cave 0x{runtime(CAVE_OFF):08X}")
     print(f"enable cheat: 80054B7C 0001 (off: 80054B7C 0000)")
     print("Single Race pseudo-HP prehook reverted; stable traffic/Raceway hook active")
-    print(
-        "Raceway/GT: Hot Pursuit keeps 4 cops + 1 traffic; "
-        "Single Race and ordinary Tournament add 1 traffic only"
-    )
+    print("Raceway/GT: Hot Pursuit keeps 4 cops + 1 traffic; Single Race adds 1 traffic only")
     print("Hot Pursuit second AI racer wrapper disabled after load hang")
     print("third traffic replacement only: 80114E18 00?? and 80118D98 00??")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
