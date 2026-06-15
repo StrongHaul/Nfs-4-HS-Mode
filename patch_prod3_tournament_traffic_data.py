@@ -14,7 +14,7 @@ TOURN_TRACK_RECORD_SIZE = 0x28
 TRAFFIC_OFF = 4
 
 
-def tier0_tournament_offsets(data: bytes) -> list[int]:
+def tournament_offsets_by_tier(data: bytes) -> tuple[list[int], list[int]]:
     if len(data) < 7 + TIER_RECORD_SIZE:
         raise SystemExit("file is too small for tournament header")
     num_tiers = data[6]
@@ -22,27 +22,35 @@ def tier0_tournament_offsets(data: bytes) -> list[int]:
         raise SystemExit("missing tier0")
 
     pos = 7
-    tier0 = data[pos : pos + TIER_RECORD_SIZE]
-    num_tourn = tier0[0]
-    tourn_offset = tier0[2]
-    if num_tourn != 6 or tourn_offset != 0:
-        raise SystemExit(
-            f"unexpected tier0 layout: numTourn={num_tourn}, tournOffset={tourn_offset}"
-        )
-    pos += TIER_RECORD_SIZE
+    tier0_offsets: list[int] = []
+    other_offsets: list[int] = []
 
-    offsets: list[int] = []
-    for _ in range(num_tourn):
-        if pos + TOURN_RECORD_SIZE > len(data):
-            raise SystemExit("truncated tournament record")
-        rec = data[pos : pos + TOURN_RECORD_SIZE]
-        num_tracks = rec[1]
-        traffic = rec[TRAFFIC_OFF]
-        if traffic not in (0, 1):
-            raise SystemExit(f"unexpected traffic byte at 0x{pos + TRAFFIC_OFF:X}: 0x{traffic:02X}")
-        offsets.append(pos)
-        pos += TOURN_RECORD_SIZE + num_tracks * TOURN_TRACK_RECORD_SIZE
-    return offsets
+    for tier_index in range(num_tiers):
+        tier = data[pos : pos + TIER_RECORD_SIZE]
+        num_tourn = tier[0]
+        tourn_offset = tier[2]
+        if tier_index == 0 and (num_tourn != 6 or tourn_offset != 0):
+            raise SystemExit(
+                f"unexpected tier0 layout: numTourn={num_tourn}, tournOffset={tourn_offset}"
+            )
+        pos += TIER_RECORD_SIZE
+
+        for _ in range(num_tourn):
+            if pos + TOURN_RECORD_SIZE > len(data):
+                raise SystemExit("truncated tournament record")
+            rec = data[pos : pos + TOURN_RECORD_SIZE]
+            num_tracks = rec[1]
+            traffic = rec[TRAFFIC_OFF]
+            if traffic not in (0, 1):
+                raise SystemExit(
+                    f"unexpected traffic byte at 0x{pos + TRAFFIC_OFF:X}: 0x{traffic:02X}"
+                )
+            if tier_index == 0:
+                tier0_offsets.append(pos)
+            else:
+                other_offsets.append(pos)
+            pos += TOURN_RECORD_SIZE + num_tracks * TOURN_TRACK_RECORD_SIZE
+    return tier0_offsets, other_offsets
 
 
 def patch_file(path: Path, *, revert: bool) -> None:
@@ -55,11 +63,11 @@ def patch_file(path: Path, *, revert: bool) -> None:
         print(f"reverted {path}")
         return
 
-    offsets = tier0_tournament_offsets(data)
+    tier0_offsets, other_offsets = tournament_offsets_by_tier(data)
     if not backup.exists():
         backup.write_bytes(data)
     changed = False
-    for off in offsets:
+    for off in tier0_offsets:
         traffic_at = off + TRAFFIC_OFF
         old = data[traffic_at]
         if old not in (0, 1):
@@ -67,11 +75,21 @@ def patch_file(path: Path, *, revert: bool) -> None:
         if old != 1:
             data[traffic_at] = 1
             changed = True
+    for off in other_offsets:
+        traffic_at = off + TRAFFIC_OFF
+        old = data[traffic_at]
+        if old not in (0, 1):
+            raise SystemExit(f"unexpected traffic byte at 0x{traffic_at:X}: 0x{old:02X}")
+        if old != 0:
+            data[traffic_at] = 0
+            changed = True
     if changed:
         path.write_bytes(data)
-    patched = ", ".join(f"0x{off + TRAFFIC_OFF:X}" for off in offsets)
+    tier0_patched = ", ".join(f"0x{off + TRAFFIC_OFF:X}" for off in tier0_offsets)
+    other_patched = ", ".join(f"0x{off + TRAFFIC_OFF:X}" for off in other_offsets)
     print(f"patched {path}")
-    print(f"tier0 ordinary Tournament fTraffic bytes: {patched}")
+    print(f"tier0 ordinary Tournament fTraffic=1 bytes: {tier0_patched}")
+    print(f"tier1+ Tournament fTraffic=0 bytes: {other_patched}")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
 
 
