@@ -8,49 +8,41 @@ from pathlib import Path
 
 ROOT_GLOB = "PROD 3*/ZTOURN*.TRN"
 BACKUP_SUFFIX = ".orig_before_prod3_tournament_traffic_data"
+TIER_RECORD_SIZE = 0x0C
 TOURN_RECORD_SIZE = 0x54
+TOURN_TRACK_RECORD_SIZE = 0x28
 TRAFFIC_OFF = 4
 
 
-def plausible_tournament_record(data: bytes, off: int) -> bool:
-    if off + TOURN_RECORD_SIZE > len(data):
-        return False
-    rec = data[off : off + TOURN_RECORD_SIZE]
-    tid, num_tracks, track_off, car_class, traffic, knockout, num_cars = rec[:7]
-    prizes = [int.from_bytes(rec[24 + i * 4 : 28 + i * 4], "little") for i in range(6)]
-    fee = int.from_bytes(rec[48:52], "little")
-    personalities = rec[52:57]
-    opponents = rec[57:62]
-    upgrades = rec[62:67]
-    laps = rec[69]
-    return (
-        1 <= tid <= 80
-        and 1 <= num_tracks <= 10
-        and track_off < 80
-        and car_class <= 5
-        and traffic in (0, 1)
-        and knockout <= 1
-        and 2 <= num_cars <= 8
-        and laps <= 9
-        and all(0 <= x <= 200000 for x in prizes)
-        and 0 <= fee <= 100000
-        and all(x < 32 for x in personalities)
-        and all(x < 80 for x in opponents)
-        and all(x < 16 for x in upgrades)
-    )
+def tier0_tournament_offsets(data: bytes) -> list[int]:
+    if len(data) < 7 + TIER_RECORD_SIZE:
+        raise SystemExit("file is too small for tournament header")
+    num_tiers = data[6]
+    if num_tiers < 1:
+        raise SystemExit("missing tier0")
 
+    pos = 7
+    tier0 = data[pos : pos + TIER_RECORD_SIZE]
+    num_tourn = tier0[0]
+    tourn_offset = tier0[2]
+    if num_tourn != 6 or tourn_offset != 0:
+        raise SystemExit(
+            f"unexpected tier0 layout: numTourn={num_tourn}, tournOffset={tourn_offset}"
+        )
+    pos += TIER_RECORD_SIZE
 
-def normal_tournament_offsets(data: bytes) -> list[int]:
-    hits = [
-        off
-        for off in range(0, len(data) - TOURN_RECORD_SIZE + 1)
-        if plausible_tournament_record(data, off)
-    ]
-    if len(hits) < 5:
-        raise SystemExit(f"found only {len(hits)} plausible tournament records")
-    # The first five records are the ordinary Tournament ladder. Later records
-    # are knockout/special-event entries; leave them alone for HP stability.
-    return hits[:5]
+    offsets: list[int] = []
+    for _ in range(num_tourn):
+        if pos + TOURN_RECORD_SIZE > len(data):
+            raise SystemExit("truncated tournament record")
+        rec = data[pos : pos + TOURN_RECORD_SIZE]
+        num_tracks = rec[1]
+        traffic = rec[TRAFFIC_OFF]
+        if traffic not in (0, 1):
+            raise SystemExit(f"unexpected traffic byte at 0x{pos + TRAFFIC_OFF:X}: 0x{traffic:02X}")
+        offsets.append(pos)
+        pos += TOURN_RECORD_SIZE + num_tracks * TOURN_TRACK_RECORD_SIZE
+    return offsets
 
 
 def patch_file(path: Path, *, revert: bool) -> None:
@@ -63,7 +55,7 @@ def patch_file(path: Path, *, revert: bool) -> None:
         print(f"reverted {path}")
         return
 
-    offsets = normal_tournament_offsets(data)
+    offsets = tier0_tournament_offsets(data)
     if not backup.exists():
         backup.write_bytes(data)
     changed = False
@@ -79,7 +71,7 @@ def patch_file(path: Path, *, revert: bool) -> None:
         path.write_bytes(data)
     patched = ", ".join(f"0x{off + TRAFFIC_OFF:X}" for off in offsets)
     print(f"patched {path}")
-    print(f"normal Tournament fTraffic bytes: {patched}")
+    print(f"tier0 ordinary Tournament fTraffic bytes: {patched}")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
 
 
