@@ -17,7 +17,7 @@ PATCH_LEN = 0x2C
 SKIP_ADDR = RUNTIME_BASE + 0x185F0
 FRONTEND_BASE_HI = 0x8011
 FRONTEND_RACE_TYPE_LO = 0x58BC
-FRONTEND_TIER_LO = 0x5922
+TOURNAMENT_MANAGER_NUM_RACERS_LO = 0x4AE8
 
 REG = {
     "zero": 0,
@@ -62,6 +62,10 @@ def lbu(rt: str, off: int, rs: str) -> int:
     return ins_i(0x24, REG[rs], REG[rt], off)
 
 
+def lw(rt: str, off: int, rs: str) -> int:
+    return ins_i(0x23, REG[rs], REG[rt], off)
+
+
 STOCK = bytes.fromhex(
     "11 80 02 3c"  # lui v0,0x8011
     "bc 58 43 90"  # lbu v1,0x58bc(v0) ; frontEnd.raceType
@@ -87,7 +91,23 @@ PATCHED = pack(
         lbu("v1", FRONTEND_RACE_TYPE_LO, "t0"),
         addiu("v0", "zero", 2),
         bne("v1", "v0", runtime(0x18520), SKIP_ADDR),
-        lbu("v1", FRONTEND_TIER_LO, "t0"),
+        lw("v1", TOURNAMENT_MANAGER_NUM_RACERS_LO, "t0"),
+        addiu("v0", "zero", 6),
+        bne("v1", "v0", runtime(0x1852C), SKIP_ADDR),
+        lbu("v0", 4, "a1"),
+        beq("v0", "zero", runtime(0x18534), SKIP_ADDR),
+        addu("s1", "zero", "zero"),
+        addiu("s4", "t0", 0x552C),
+    ]
+)
+
+PREVIOUS_TIER_PATCHED = pack(
+    [
+        lui("t0", FRONTEND_BASE_HI),
+        lbu("v1", FRONTEND_RACE_TYPE_LO, "t0"),
+        addiu("v0", "zero", 2),
+        bne("v1", "v0", runtime(0x18520), SKIP_ADDR),
+        lbu("v1", 0x5922, "t0"),
         bne("v1", "zero", runtime(0x18528), SKIP_ADDR),
         lbu("v0", 4, "a1"),
         beq("v0", "zero", runtime(0x18530), SKIP_ADDR),
@@ -139,7 +159,7 @@ def find_front() -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="PROD3: skip Tournament traffic outside ordinary tier0 Tournament."
+        description="PROD3: skip Tournament traffic unless tournament has six racers."
     )
     parser.add_argument("--revert", action="store_true")
     args = parser.parse_args()
@@ -149,7 +169,13 @@ def main() -> int:
     data = bytearray(original)
 
     current = bytes(data[PATCH_OFF : PATCH_OFF + PATCH_LEN])
-    if current not in {STOCK, PATCHED, PREVIOUS_PATCHED, WRONG_TIER_ADDR_PATCHED}:
+    if current not in {
+        STOCK,
+        PATCHED,
+        PREVIOUS_PATCHED,
+        PREVIOUS_TIER_PATCHED,
+        WRONG_TIER_ADDR_PATCHED,
+    }:
         raise SystemExit(f"unexpected bytes at 0x{PATCH_OFF:X}: {current.hex(' ')}")
 
     backup = front.with_name(front.name + BACKUP_SUFFIX)
@@ -164,7 +190,7 @@ def main() -> int:
         front.write_bytes(data)
 
     print(("reverted" if args.revert else "patched"), front)
-    print("Tournament traffic: enabled only when frontEnd.tier == 0")
+    print("Tournament traffic: enabled only when tournamentManager.fNumRacers == 6")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
