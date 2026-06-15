@@ -17,7 +17,7 @@ PATCH_LEN = 0x2C
 SKIP_ADDR = RUNTIME_BASE + 0x185F0
 FRONTEND_BASE_HI = 0x8011
 FRONTEND_RACE_TYPE_LO = 0x58BC
-FRONTEND_TIER_LO = 0x59DA
+FRONTEND_TIER_LO = 0x5922
 
 REG = {
     "zero": 0,
@@ -113,6 +113,22 @@ PREVIOUS_PATCHED = pack(
     ]
 )
 
+WRONG_TIER_ADDR_PATCHED = pack(
+    [
+        lui("t0", FRONTEND_BASE_HI),
+        lbu("v1", FRONTEND_RACE_TYPE_LO, "t0"),
+        addiu("v0", "zero", 2),
+        bne("v1", "v0", runtime(0x18520), SKIP_ADDR),
+        lbu("v1", 0x59DA, "t0"),
+        bne("v1", "zero", runtime(0x18528), SKIP_ADDR),
+        lbu("v0", 4, "a1"),
+        beq("v0", "zero", runtime(0x18530), SKIP_ADDR),
+        addu("s1", "zero", "zero"),
+        addiu("s4", "t0", 0x552C),
+        0,
+    ]
+)
+
 
 def find_front() -> Path:
     hits = list(Path(".").glob(FRONT_GLOB))
@@ -133,7 +149,7 @@ def main() -> int:
     data = bytearray(original)
 
     current = bytes(data[PATCH_OFF : PATCH_OFF + PATCH_LEN])
-    if current not in {STOCK, PATCHED, PREVIOUS_PATCHED}:
+    if current not in {STOCK, PATCHED, PREVIOUS_PATCHED, WRONG_TIER_ADDR_PATCHED}:
         raise SystemExit(f"unexpected bytes at 0x{PATCH_OFF:X}: {current.hex(' ')}")
 
     backup = front.with_name(front.name + BACKUP_SUFFIX)
