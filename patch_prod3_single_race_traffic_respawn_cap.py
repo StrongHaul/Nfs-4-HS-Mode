@@ -28,12 +28,9 @@ GAME_TYPE_OFF = 0x0000
 SINGLE_RACE_GAME_TYPE = 0
 HOT_PURSUIT_GAME_TYPE = 1
 TOURNAMENT_GAME_TYPE = 2
-BOOSTED_SINGLE_RACE_RELEASE_INTERVAL = 1
-BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL = 1
-BOOSTED_TOURNAMENT_RELEASE_INTERVAL = 1
-LEGACY_SINGLE_RACE_RELEASE_INTERVAL = 5
-LEGACY_HOT_PURSUIT_RELEASE_INTERVAL = 2
-LEGACY_TOURNAMENT_RELEASE_INTERVAL = 2
+BOOSTED_SINGLE_RACE_RELEASE_INTERVAL = 5
+BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL = 2
+BOOSTED_TOURNAMENT_RELEASE_INTERVAL = 2
 
 REG = {
     "zero": 0,
@@ -130,14 +127,7 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def cave(
-    *,
-    include_hot_pursuit: bool = True,
-    include_tournament: bool = True,
-    single_race_interval: int = BOOSTED_SINGLE_RACE_RELEASE_INTERVAL,
-    hot_pursuit_interval: int = BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL,
-    tournament_interval: int = BOOSTED_TOURNAMENT_RELEASE_INTERVAL,
-) -> bytes:
+def cave(*, include_hot_pursuit: bool = True, include_tournament: bool = True) -> bytes:
     if not include_hot_pursuit:
         items: list[int | str | tuple[str, str, str, str]] = [
             # Legacy SR-only version.
@@ -150,10 +140,10 @@ def cave(
             lw("t1", GAME_TYPE_OFF, "t0"),
             bne("t1", "zero", "finish"),
             nop(),
-            slti("t1", "v0", single_race_interval),
+            slti("t1", "v0", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
             beq("t1", "zero", "finish"),
             nop(),
-            addiu("v0", "zero", single_race_interval),
+            addiu("v0", "zero", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
             "finish",
             j(RETURN_ADDR),
             nop(),
@@ -191,10 +181,10 @@ def cave(
                 # HP + enabled traffic cheat: let the second night traffic car
                 # leave purgatory. Tournament uses the same compact density boost
                 # without changing carData composition.
-                slti("t1", "v0", hot_pursuit_interval),
+                slti("t1", "v0", BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL),
                 beq("t1", "zero", "finish"),
                 nop(),
-                addiu("v0", "zero", tournament_interval),
+                addiu("v0", "zero", BOOSTED_TOURNAMENT_RELEASE_INTERVAL),
                 beq("zero", "zero", "finish"),
                 nop(),
             ]
@@ -205,10 +195,10 @@ def cave(
         # Single Race + enabled Raceway/traffic cheat: heavily shorten the
         # roving traffic release interval, so replacement traffic appears much
         # sooner after the live count drops.
-        slti("t1", "v0", single_race_interval),
+        slti("t1", "v0", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
         beq("t1", "zero", "finish"),
         nop(),
-        addiu("v0", "zero", single_race_interval),
+        addiu("v0", "zero", BOOSTED_SINGLE_RACE_RELEASE_INTERVAL),
         "finish",
         j(RETURN_ADDR),
         nop(),
@@ -244,21 +234,10 @@ def main() -> int:
         raise SystemExit(f"unexpected hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     blob = cave()
-    legacy_full_blob = cave(
-        single_race_interval=LEGACY_SINGLE_RACE_RELEASE_INTERVAL,
-        hot_pursuit_interval=LEGACY_HOT_PURSUIT_RELEASE_INTERVAL,
-        tournament_interval=LEGACY_TOURNAMENT_RELEASE_INTERVAL,
-    )
     previous_blob = cave(include_hot_pursuit=False)
     previous_hp_blob = cave(include_tournament=False)
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {
-        b"\x00" * CAVE_LEN,
-        blob,
-        legacy_full_blob,
-        previous_blob,
-        previous_hp_blob,
-    }:
+    if current_cave not in {b"\x00" * CAVE_LEN, blob, previous_blob, previous_hp_blob}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}: {current_cave[:16].hex(' ')}")
 
     if args.revert:
@@ -275,9 +254,9 @@ def main() -> int:
         exe.write_bytes(data)
 
     print(("reverted" if args.revert else "patched"), exe)
-    print("Single Race + 80054B7C: traffic release interval <= 1 frame")
-    print("Hot Pursuit + 80054B7C: traffic release interval <= 1 frame")
-    print("Tournament + 80054B7C: traffic release interval <= 1 frame")
+    print("Single Race + 80054B7C: traffic release interval <= 5 frames")
+    print("Hot Pursuit + 80054B7C: traffic release interval <= 2 frames")
+    print("Tournament + 80054B7C: traffic release interval <= 2 frames")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
