@@ -29,9 +29,7 @@ SINGLE_RACE_GAME_TYPE = 0
 HOT_PURSUIT_GAME_TYPE = 1
 TOURNAMENT_GAME_TYPE = 2
 BOOSTED_SINGLE_RACE_RELEASE_INTERVAL = 1
-# Hot Pursuit uses extra police/traffic bookkeeping. Forcing this roving
-# release interval lower made HP traffic appear less often, so leave HP stock.
-BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL = 0
+BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL = 1
 BOOSTED_TOURNAMENT_RELEASE_INTERVAL = 1
 LEGACY_SINGLE_RACE_RELEASE_INTERVAL = 5
 LEGACY_HOT_PURSUIT_RELEASE_INTERVAL = 2
@@ -203,10 +201,7 @@ def cave(
                 *(
                     [
                         # After subtracting HP's raceType, HP is 0 and Tournament is 1.
-                        # HP stays on the stock release interval; this hook only boosts
-                        # Tournament here, because the HP path became rarer when capped.
-                        beq("t1", "zero", "finish"),
-                        nop(),
+                        # Keep every other mode on the stock release interval.
                         slti("t1", "t1", TOURNAMENT_GAME_TYPE),
                         beq("t1", "zero", "finish"),
                     ]
@@ -214,9 +209,10 @@ def cave(
                     else [bne("t1", "zero", "finish")]
                 ),
                 nop(),
-                # Tournament + enabled traffic cheat: shorten the roving traffic
-                # release interval without changing carData composition.
-                *interval_items(tournament_interval),
+                # HP + enabled traffic cheat: let the second night traffic car
+                # leave purgatory. Tournament uses the same compact density boost
+                # without changing carData composition.
+                *interval_items(hot_pursuit_interval),
                 beq("zero", "zero", "finish"),
                 nop(),
             ]
@@ -298,7 +294,7 @@ def main() -> int:
 
     print(("reverted" if args.revert else "patched"), exe)
     print("Single Race + 80054B7C: traffic release interval <= 1 frame")
-    print("Hot Pursuit + 80054B7C: stock traffic release interval")
+    print("Hot Pursuit + 80054B7C: traffic release interval <= 1 frame")
     print("Tournament + 80054B7C: traffic release interval <= 1 frame")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
