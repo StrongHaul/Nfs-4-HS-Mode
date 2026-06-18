@@ -28,7 +28,8 @@ ENABLE_ADDR = 0x80054B7C
 TRAFFIC_FLAG = 0x0010
 CAR_FLAGS_OFF = 0x0260
 PURGATORY_TIMER_OFF = 0x058C
-BOOSTED_TIMER_CAP = 4
+BOOSTED_TIMER_CAP = 1
+LEGACY_TIMER_CAP = 4
 
 REG = {
     "zero": 0,
@@ -129,7 +130,7 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
     return pack(words)
 
 
-def cave() -> bytes:
+def cave(timer_cap: int = BOOSTED_TIMER_CAP) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Hook delay slot already ran stock: addiu v0,v0,1.
         lui("t0", hi(ENABLE_ADDR)),
@@ -140,10 +141,10 @@ def cave() -> bytes:
         andi("t0", "t0", TRAFFIC_FLAG),
         beq("t0", "zero", "store"),
         nop(),
-        slti("t0", "v0", BOOSTED_TIMER_CAP + 1),
+        slti("t0", "v0", timer_cap + 1),
         bne("t0", "zero", "store"),
         nop(),
-        addiu("v0", "zero", BOOSTED_TIMER_CAP),
+        addiu("v0", "zero", timer_cap),
         "store",
         sw("v0", PURGATORY_TIMER_OFF, "v1"),
         j(RETURN_ADDR),
@@ -180,8 +181,9 @@ def main() -> int:
         raise SystemExit(f"unexpected hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     blob = cave()
+    legacy_blob = cave(LEGACY_TIMER_CAP)
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {b"\x00" * CAVE_LEN, blob}:
+    if current_cave not in {b"\x00" * CAVE_LEN, blob, legacy_blob}:
         raise SystemExit(f"cave is not empty/known at 0x{CAVE_OFF:X}: {current_cave[:16].hex(' ')}")
 
     if args.revert:
