@@ -95,28 +95,6 @@ def slti(rt: str, rs: str, imm: int) -> int:
     return ins_i(0x0A, REG[rs], REG[rt], imm)
 
 
-def cap_interval_items(interval: int) -> list[int | str | tuple[str, str, str, str]]:
-    return [
-        # If the stock interval is already <= interval, keep it. Otherwise cap
-        # it down to the requested value.
-        slti("t1", "v0", interval + 1),
-        bne("t1", "zero", "finish"),
-        nop(),
-        addiu("v0", "zero", interval),
-    ]
-
-
-def old_min_interval_items(interval: int) -> list[int | str | tuple[str, str, str, str]]:
-    return [
-        # Old broken behavior: this raised very small intervals but left large
-        # stock intervals unchanged.
-        slti("t1", "v0", interval),
-        beq("t1", "zero", "finish"),
-        nop(),
-        addiu("v0", "zero", interval),
-    ]
-
-
 def nop() -> int:
     return 0
 
@@ -159,9 +137,7 @@ def cave(
     single_race_interval: int = BOOSTED_SINGLE_RACE_RELEASE_INTERVAL,
     hot_pursuit_interval: int = BOOSTED_HOT_PURSUIT_RELEASE_INTERVAL,
     tournament_interval: int = BOOSTED_TOURNAMENT_RELEASE_INTERVAL,
-    use_old_min_logic: bool = False,
 ) -> bytes:
-    interval_items = old_min_interval_items if use_old_min_logic else cap_interval_items
     if not include_hot_pursuit:
         items: list[int | str | tuple[str, str, str, str]] = [
             # Legacy SR-only version.
@@ -174,7 +150,10 @@ def cave(
             lw("t1", GAME_TYPE_OFF, "t0"),
             bne("t1", "zero", "finish"),
             nop(),
-            *interval_items(single_race_interval),
+            slti("t1", "v0", single_race_interval),
+            beq("t1", "zero", "finish"),
+            nop(),
+            addiu("v0", "zero", single_race_interval),
             "finish",
             j(RETURN_ADDR),
             nop(),
@@ -212,7 +191,10 @@ def cave(
                 # HP + enabled traffic cheat: let the second night traffic car
                 # leave purgatory. Tournament uses the same compact density boost
                 # without changing carData composition.
-                *interval_items(hot_pursuit_interval),
+                slti("t1", "v0", hot_pursuit_interval),
+                beq("t1", "zero", "finish"),
+                nop(),
+                addiu("v0", "zero", tournament_interval),
                 beq("zero", "zero", "finish"),
                 nop(),
             ]
@@ -223,7 +205,10 @@ def cave(
         # Single Race + enabled Raceway/traffic cheat: heavily shorten the
         # roving traffic release interval, so replacement traffic appears much
         # sooner after the live count drops.
-        *interval_items(single_race_interval),
+        slti("t1", "v0", single_race_interval),
+        beq("t1", "zero", "finish"),
+        nop(),
+        addiu("v0", "zero", single_race_interval),
         "finish",
         j(RETURN_ADDR),
         nop(),
@@ -259,20 +244,17 @@ def main() -> int:
         raise SystemExit(f"unexpected hook bytes at 0x{HOOK_OFF:X}: {current_hook.hex(' ')}")
 
     blob = cave()
-    broken_one_frame_blob = cave(use_old_min_logic=True)
     legacy_full_blob = cave(
         single_race_interval=LEGACY_SINGLE_RACE_RELEASE_INTERVAL,
         hot_pursuit_interval=LEGACY_HOT_PURSUIT_RELEASE_INTERVAL,
         tournament_interval=LEGACY_TOURNAMENT_RELEASE_INTERVAL,
-        use_old_min_logic=True,
     )
-    previous_blob = cave(include_hot_pursuit=False, use_old_min_logic=True)
-    previous_hp_blob = cave(include_tournament=False, use_old_min_logic=True)
+    previous_blob = cave(include_hot_pursuit=False)
+    previous_hp_blob = cave(include_tournament=False)
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
     if current_cave not in {
         b"\x00" * CAVE_LEN,
         blob,
-        broken_one_frame_blob,
         legacy_full_blob,
         previous_blob,
         previous_hp_blob,
