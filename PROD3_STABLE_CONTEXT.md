@@ -18,12 +18,12 @@ FRONT.BIN 5062835E2B00A6F7F96E8B4C5A38AF1C
 git       d6f8cad Restore requested stable civilian siren state
 ```
 
-Stable point confirmed by user on 2026-06-28 (HP starts first try; HP night has 2 traffic cars):
+Stable point confirmed by user on 2026-06-29 (replay camera behavior=1.5; HP starts first try; HP night has 2 traffic cars):
 
 ```text
-NFS4.EXE  480F9A51DACB130884452887213A3231
+NFS4.EXE  425AEC740D015EA47EDC8AA36B8FFD78
 FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
-Replay chase cameras / clean replay UI and HP night traffic state accepted as stable.
+Replay chase cameras / clean replay UI, replay camera behavior=1.5, and HP night traffic state accepted as stable.
 ```
 
 Replay notes carried over from the stable point:
@@ -34,6 +34,7 @@ Replay notes carried over from the stable point:
 - `On` switches replay camera table to alternating tuned chase cameras: `3,6,3,6,3,6,3,6,3`.
 - `Off` restores stock replay camera table: `19,10,11,8,9,6,4,15,0`.
 - The active cheat fragment is `PROD3_replay_chase_cameras_clean_ui.cht`.
+- Replay position 5 tuned fixedness uses `behavior=1.5` (`80081830 1800` when the replay cheat is On).
 
 
 Проверено пользователем после отката к стабильному EXE `0CFB1D2302D9042A2D165EC7403DA3C3` и старой объединенной схеме DuckStation-чита для мигалок/сирены гражданской машины. Это состояние принято как стабильное.
