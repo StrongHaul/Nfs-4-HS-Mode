@@ -18,6 +18,24 @@ FRONT.BIN 5062835E2B00A6F7F96E8B4C5A38AF1C
 git       d6f8cad Restore requested stable civilian siren state
 ```
 
+Stable point confirmed by user on 2026-06-28 (HP starts first try; HP night has 2 traffic cars):
+
+```text
+NFS4.EXE  480F9A51DACB130884452887213A3231
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+Replay chase cameras / clean replay UI and HP night traffic state accepted as stable.
+```
+
+Replay notes carried over from the stable point:
+
+- `NFS4.EXE` contains a permanent replay HUD auto-hide hook.
+- The hook checks `8011F20C`; in testing the HUD auto-hide works both with the cheat off and on, and this behavior is accepted.
+- DuckStation cheat `[My\Replay chase cameras and clean UI]` still uses `8011F20C 000?`.
+- `On` switches replay camera table to alternating tuned chase cameras: `3,6,3,6,3,6,3,6,3`.
+- `Off` restores stock replay camera table: `19,10,11,8,9,6,4,15,0`.
+- The active cheat fragment is `PROD3_replay_chase_cameras_clean_ui.cht`.
+
+
 Проверено пользователем после отката к стабильному EXE `0CFB1D2302D9042A2D165EC7403DA3C3` и старой объединенной схеме DuckStation-чита для мигалок/сирены гражданской машины. Это состояние принято как стабильное.
 
 Состояние на момент фиксации:
@@ -260,7 +278,7 @@ DrawC reverse mask hook:
 - В Raceway-картах добавлен стабильный traffic:
   - HP: 1 traffic + копы сохранены;
   - Single Race: traffic тоже работает.
-- В Single Race и Hot Pursuit увеличена частота появления traffic при включенном `80054B7C 0001`: hook на roving-traffic release check сокращает порог выпуска до `5` кадров в SR и до `2` кадров в HP.
+- При включенном `80054B7C 0001` `FRONT.BIN` держит HP night `maxTraffic = 2`, а hook на roving-traffic release check поднимает минимальный лимит активного traffic: до `5` машин в SR и до `2` машин в HP. Подтверждено пользователем: HP стартует с первого раза, ночью в HP 2 traffic-машины.
 - В Tournament чит `80054B7C 0001` принудительно включает frontend traffic даже для турниров, где `fTraffic == 0`:
   - обычный Tournament: до 3 traffic-машин;
   - HP/special-event Tournament (`frontEnd.tier == 1`): 1 traffic-машина, чтобы итоговый состав `игрок + 3 ИИ + 4 копа + 1 traffic` не превышал лимит 9 машин.
