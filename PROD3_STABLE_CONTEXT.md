@@ -18,12 +18,12 @@ FRONT.BIN 5062835E2B00A6F7F96E8B4C5A38AF1C
 git       d6f8cad Restore requested stable civilian siren state
 ```
 
-Stable point confirmed by user on 2026-06-29 (replay camera behavior=1.5; HP starts first try; HP night has 2 traffic cars):
+Stable point confirmed by user on 2026-06-29 (tournament traffic restored; replay camera behavior=1.5; HP starts first try; HP night has 2 traffic cars):
 
 ```text
 NFS4.EXE  425AEC740D015EA47EDC8AA36B8FFD78
 FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
-Replay chase cameras / clean replay UI, replay camera behavior=1.5, and HP night traffic state accepted as stable.
+Replay chase cameras / clean replay UI, replay camera behavior=1.5, HP night traffic, and Tournament traffic state accepted as stable.
 ```
 
 Replay notes carried over from the stable point:
@@ -35,6 +35,12 @@ Replay notes carried over from the stable point:
 - `Off` restores stock replay camera table: `19,10,11,8,9,6,4,15,0`.
 - The active cheat fragment is `PROD3_replay_chase_cameras_clean_ui.cht`.
 - Replay position 5 tuned fixedness uses `behavior=1.5` (`80081830 1800` when the replay cheat is On).
+
+- Tournament traffic is enabled through `ZTOURN*.TRN` data, not through the reverted risky `FRONT.BIN` force-hook.
+- Confirmed by user: starting Tournament immediately after boot no longer hangs, and Tournament has 1 traffic car.
+- `ZTOURN.TRN  06CC06F5C85FEF4C2F66627F4CBAFCDD`
+- `ZTOURNB.TRN A54BBFE9D8E1BC2E9CEB75D73CF615A1`
+- `ZTOURNC.TRN FB8C7F80571CB5241DD8A13879234E75`
 
 
 Проверено пользователем после отката к стабильному EXE `0CFB1D2302D9042A2D165EC7403DA3C3` и старой объединенной схеме DuckStation-чита для мигалок/сирены гражданской машины. Это состояние принято как стабильное.
