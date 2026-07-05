@@ -1,0 +1,10 @@
+[Мои\Увеличенная масса коллизии игрока]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F21C 000?
+D011F21C 0000
+801144DC 0008
+D011F21C 0001
+801144DC 000A

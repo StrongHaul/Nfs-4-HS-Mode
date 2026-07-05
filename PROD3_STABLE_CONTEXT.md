@@ -10,6 +10,23 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 
 ## Стабильная версия
 
+Stable point confirmed by user on 2026-07-05 (player collision mass toggle added):
+
+```text
+NFS4.EXE  D56214BFA980EAC29D2346E889AC5025
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+```
+
+Collision mass toggle notes:
+
+- Player collision mass is off by default in `NFS4.EXE`: `data_801144DC = 0008`.
+- DuckStation collision-mass cheat / flag `8011F21C` toggles the mass bit:
+  - Off writes `801144DC 0008`;
+  - On writes `801144DC 000A`.
+- Existing stable mass hook/multiplier is retained; the cheat only controls bit `0x0002`.
+- Local cheat fragment: `PROD3_player_collision_mass_toggle.cht`; generator: `patch_prod3_player_collision_mass_toggle.py`.
+
+
 Stable point confirmed by user on 2026-07-05 (power/speed toggle added; current replay camera experiment accepted as a temporary stable checkpoint):
 
 ```text
