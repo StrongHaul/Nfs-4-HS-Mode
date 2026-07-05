@@ -10,6 +10,24 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 
 ## Стабильная версия
 
+Stable point confirmed by user on 2026-07-05 (power/speed toggle added; current replay camera experiment accepted as a temporary stable checkpoint):
+
+```text
+NFS4.EXE  C5504C22589352A329839FCCD420AD75
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+```
+
+Current accepted notes:
+
+- Player acceleration/speed/torque is stock by default and is controlled by DuckStation power/speed cheat / flag `8011F218`.
+- This cheat only controls power/speed/torque patch points; steering and collision mass are not controlled by it.
+- Local cheat fragment: `PROD3_player_power_speed_toggle.cht`; generator: `patch_prod3_player_power_speed_toggle.py`.
+- Replay camera work is accepted as a temporary stable checkpoint, but the far camera still may be revisited later.
+- Replay camera cheat / `PROD3_replay_chase_cameras_clean_ui.cht` currently switches On replay camera table to `3,4,3,4,3,4,3,4,3` to avoid the more dynamic `HeliCam` mode 6 behavior.
+- Near TailCam uses `80081830 2000` when the replay cheat is On.
+- Far camera experiments currently leave aggressive HeliCam smoothing lines in the cheat fragment, but the active far replay slots use mode `4`; these lines are retained for now and can be cleaned when the camera pass resumes.
+
+
 Последняя подтвержденная пользователем стабильная точка:
 
 ```text
