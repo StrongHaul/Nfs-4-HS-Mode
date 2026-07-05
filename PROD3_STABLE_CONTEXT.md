@@ -410,3 +410,17 @@ f832e7d Guard player bust no-cops bypass
 При `0001` моргание обычных машин должно включаться, при `0000` - выключаться.
 9. Проверить `Damage только визуальный`: при `Выкл:0` damage должен ослаблять машину штатно, при `Вкл:1` повреждения должны оставаться визуальными без ослабления.
 10. Проверить `Сирена на обычной машине игрока`: при `Вкл:1` на неполицейской машине игрока должен появиться звук сирены; тип сирены выбирается соседним читом `Полицейская сирена`.
+
+Stable point confirmed by user on 2026-07-05 (player low LOD and player wheel visual steering are now cheat toggles):
+
+```text
+NFS4.EXE  22CD7C1CAD63E53210B64816E9D17497
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+```
+
+Player visual toggles added after the tournament traffic stable point:
+
+- Player low polygon LOD is stock/high by default and can be enabled with DuckStation cheat `[My\Player car low polygon LOD]` / flag `8011F210`.
+- Player wheel steering animation is stock by default and can be disabled with DuckStation cheat `[My\Анимация поворота колес игрока]` / flag `8011F214`.
+- Cheat fragments: `PROD3_player_low_lod_toggle.cht`, `PROD3_player_wheel_steer_toggle.cht`.
+
