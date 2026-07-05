@@ -10,6 +10,22 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 
 ## Стабильная версия
 
+Stable point confirmed by user on 2026-07-06 (traffic yield converted to toggle cheat):
+
+```text
+NFS4.EXE  D20593943A2C3F25F1EE364DFB3FE014
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+```
+
+Traffic yield toggle notes:
+
+- Traffic yield-to-non-traffic-units is off by default in `NFS4.EXE`.
+- DuckStation traffic-yield cheat / flag `8011F220` toggles the feature:
+  - Off restores stock `CheckForCops` / `CopCheck` behavior;
+  - On scans all cars and accepts the selected non-traffic candidate, matching the previously stable always-on behavior.
+- Local cheat fragment: `PROD3_traffic_yield_toggle.cht`; generator: `patch_prod3_traffic_yield_toggle.py`.
+
+
 Stable point confirmed by user on 2026-07-05 (player collision mass toggle added):
 
 ```text
