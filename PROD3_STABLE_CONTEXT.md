@@ -475,3 +475,20 @@ Player visual toggles added after the tournament traffic stable point:
 - Player wheel steering animation is stock by default and can be disabled with DuckStation cheat `[My\Анимация поворота колес игрока]` / flag `8011F214`.
 - Cheat fragments: `PROD3_player_low_lod_toggle.cht`, `PROD3_player_wheel_steer_toggle.cht`.
 
+## Stable point: second HP AI model cheat
+
+Confirmed by user on 2026-07-11:
+
+```text
+NFS4.EXE  33ADA99664FFBCE318A2007E9BEF41BC
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+```
+
+`[???\???? X. ?????? ?? ?????? ? HP]` is handled by the player car-data sync cave at `0x800F7D00`:
+
+```text
+80054800 0000  same model as the first AI racer
+80054800 00??  force a model ID for the second AI racer
+```
+
+The override is applied before the second AI car resources are loaded. It shares the previous stable behavior at `0000` and does not modify the working cop replacement cheats.

@@ -42,11 +42,20 @@ OLD_CAVE_LEN = len(OLD_CAVE)
 CAVE_OFF = 0xE8500
 CAVE_ADDR = RUNTIME_BASE + CAVE_OFF
 CAVE_LEN = 0x58
+# Stable player-sync cave before the second-AI model override was added.
+STABLE_CAVE = bytes.fromhex(
+    "00000824090028160000000000004990000040ac000049a012800a3cf88740ad"
+    "f88749a1050000100000000002000824020028160000000088046226880202ae"
+    "392c0208000000000000000000000000000000000000000000"
+)[:CAVE_LEN]
 
 PLAYER_SLOT = 0
 SECOND_AI_SLOT = 2
 FIRST_AI_CARDATA_OFF_FROM_SETUP_BASE = 0x488
 PLAYER_MIRROR_CAR_ID_ADDR = 0x801187F8
+# 0000 preserves the stable "same as first AI" behaviour. Any other value
+# replaces the second HP racer's model before its resources are loaded.
+SECOND_AI_MODEL_CHEAT_ADDR = 0x80054800
 
 REG = {
     "zero": 0,
@@ -116,6 +125,10 @@ def lbu(rt: str, off: int, rs: str) -> int:
     return ins_i(0x24, REG[rs], REG[rt], off)
 
 
+def lhu(rt: str, off: int, rs: str) -> int:
+    return ins_i(0x25, REG[rs], REG[rt], off)
+
+
 def sb(rt: str, off: int, rs: str) -> int:
     return ins_i(0x28, REG[rs], REG[rt], off)
 
@@ -162,12 +175,11 @@ def pack_labeled(items: list[int | str | tuple[str, str, str, str]], base_pc: in
 def make_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # The hook delay slot has already computed the stock carData pointer.
-        addiu("t0", "zero", PLAYER_SLOT),
-        bne("s1", "t0", "check_second_ai"),
-        nop(),
+        # Load early in the branch delay slot: non-player slots simply ignore t1.
+        bne("s1", "zero", "check_second_ai"),
+        lbu("t1", 0, "v0"),
         # GameShark 30xxxxxx codes write one byte. Normalize the primary
         # word's low byte and mirror it into the replay/setup copy.
-        lbu("t1", 0, "v0"),
         sw("zero", 0, "v0"),
         sb("t1", 0, "v0"),
         lui("t2", hi(PLAYER_MIRROR_CAR_ID_ADDR)),
@@ -176,10 +188,18 @@ def make_cave() -> bytes:
         beq("zero", "zero", "store"),
         nop(),
         "check_second_ai",
-        # Preserve the existing PROD3 behavior: second AI shares first AI carData.
+        # 0000 keeps the stable shared-first-AI model. 00?? supplies a separate
+        # model id for the second HP racer while keeping its own carData block.
         addiu("t0", "zero", SECOND_AI_SLOT),
         bne("s1", "t0", "store"),
+        lui("t1", hi(SECOND_AI_MODEL_CHEAT_ADDR)),
+        lhu("t2", lo(SECOND_AI_MODEL_CHEAT_ADDR), "t1"),
+        beq("t2", "zero", "share_first_ai"),
         nop(),
+        sw("t2", 0, "v0"),
+        beq("zero", "zero", "store"),
+        nop(),
+        "share_first_ai",
         addiu("v0", "s3", FIRST_AI_CARDATA_OFF_FROM_SETUP_BASE),
         "store",
         sw("v0", 0x0288, "s0"),
@@ -210,7 +230,7 @@ def main() -> int:
         raise SystemExit(f"unexpected carData hook bytes: {current_hook.hex(' ')}")
 
     current_cave = bytes(data[CAVE_OFF : CAVE_OFF + CAVE_LEN])
-    if current_cave not in {bytes(CAVE_LEN), cave}:
+    if current_cave not in {bytes(CAVE_LEN), STABLE_CAVE, cave}:
         raise SystemExit(f"new cave is not empty/known at 0x{CAVE_OFF:X}: {current_cave[:16].hex(' ')}")
 
     current_old_cave = bytes(data[OLD_CAVE_OFF : OLD_CAVE_OFF + OLD_CAVE_LEN])
