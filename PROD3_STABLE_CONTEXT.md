@@ -503,3 +503,20 @@ FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
 ```
 
 With player cop livery mode `800553F4 0001`, Snowy Ridge now uses the US/Canada country slot (`04`) instead of the German slot (`02`). The existing Raceway country mapping remains unchanged.
+
+## Stable point: player-relative traffic respawn
+
+Confirmed by user on 2026-07-13:
+
+```text
+NFS4.EXE  B4986CA7737FCBFEB6B8AFD87DE74ED4
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+```
+
+Traffic reincarnation now uses the player as its only life-basis car:
+
+- a new traffic position is chosen relative to the player;
+- AI racers and cops cannot keep distant traffic active;
+- traffic counts, release timing, and density remain unchanged.
+
+Implementation: `patch_prod3_traffic_respawn_player_only.py`.
