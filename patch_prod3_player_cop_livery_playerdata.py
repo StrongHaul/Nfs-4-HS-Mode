@@ -42,7 +42,7 @@ TRACK_COUNTRY_TABLE_ADDR = RUNTIME_BASE + TRACK_COUNTRY_TABLE_OFF
 # 0 Snowy, 1 Highway, 2 Coastal, 3 France, 4 Park, 5 Celtic,
 # 6 Germany, 7 UK, 8-10 GT tracks, 11 undefined.
 TRACK_COUNTRY_SLOTS = bytes([
-    2,  # Snowy
+    4,  # Snowy / US-Canada
     4,  # Highway
     4,  # Coastal
     1,  # France
@@ -58,6 +58,10 @@ TRACK_COUNTRY_SLOTS = bytes([
     0,
     0,
     0,
+])
+# Previous stable table, retained so the patch can be reapplied over it.
+PREVIOUS_TRACK_COUNTRY_SLOTS = bytes([
+    2, 4, 4, 1, 4, 0, 2, 0, 4, 1, 2, 0, 0, 0, 0, 0,
 ])
 
 # Free space before the AI-racer mass cave starts at 0x45C00.
@@ -178,7 +182,7 @@ def lo(addr: int) -> int:
     return addr & 0xFFFF
 
 
-def cave() -> bytes:
+def cave(track_country_slots: bytes = TRACK_COUNTRY_SLOTS) -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         # Delay slot at hook already executes: addiu v0,s5,-22.
         lui("t0", hi(ENABLE_ADDR)),
@@ -237,8 +241,12 @@ def cave() -> bytes:
             f"cave too large: 0x{len(blob):X} > 0x{TRACK_COUNTRY_TABLE_OFF - ENTRY_CAVE_OFF:X}"
         )
     blob = blob.ljust(TRACK_COUNTRY_TABLE_OFF - ENTRY_CAVE_OFF, b"\x00")
-    blob += TRACK_COUNTRY_SLOTS
+    blob += track_country_slots
     return blob.ljust(PLAYER_LIVERY_CAVE_LEN, b"\x00")
+
+
+def previous_track_country_cave() -> bytes:
+    return cave(PREVIOUS_TRACK_COUNTRY_SLOTS)
 
 
 def old_custom_only_cave() -> bytes:
@@ -386,6 +394,7 @@ def main() -> int:
     safe_entry_caves = [
         b"\x00" * PLAYER_LIVERY_CAVE_LEN,
         new_cave,
+        previous_track_country_cave(),
         broken_mode_cave,
         old_custom_only_cave(),
         old_ai_cop_country_cave(),

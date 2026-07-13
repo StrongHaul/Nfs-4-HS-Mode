@@ -492,3 +492,14 @@ FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
 ```
 
 The override is applied before the second AI car resources are loaded. It shares the previous stable behavior at `0000` and does not modify the working cop replacement cheats.
+
+## Stable point: Snowy Ridge player cop livery
+
+Confirmed by user on 2026-07-13:
+
+```text
+NFS4.EXE  E0AF4BD358694ED30DAE64375B9A9427
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+```
+
+With player cop livery mode `800553F4 0001`, Snowy Ridge now uses the US/Canada country slot (`04`) instead of the German slot (`02`). The existing Raceway country mapping remains unchanged.

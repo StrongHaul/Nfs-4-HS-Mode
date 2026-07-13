@@ -31,8 +31,26 @@ OLD_TABLE = bytes([
     0,
     0,
 ])
-NEW_TABLE = bytes([
+PREVIOUS_NEW_TABLE = bytes([
     2,  # Snowy -> German
+    4,  # Highway -> US/Canada
+    4,  # Coastal -> US/Canada
+    1,  # France -> French
+    4,  # Park -> US/Canada
+    0,  # Celtic -> UK
+    2,  # Germany -> German
+    0,  # UK -> UK
+    4,  # Raceway 2 -> US/Canada
+    1,  # Raceway -> French
+    2,  # Raceway 3 -> German
+    0,
+    0,
+    0,
+    0,
+    0,
+])
+NEW_TABLE = bytes([
+    4,  # Snowy -> US/Canada
     4,  # Highway -> US/Canada
     4,  # Coastal -> US/Canada
     1,  # France -> French
@@ -88,7 +106,7 @@ def main() -> int:
     data = bytearray(original)
 
     current = bytes(data[TABLE_OFF : TABLE_OFF + len(OLD_TABLE)])
-    if current not in {OLD_TABLE, NEW_TABLE, PREVIOUS_SWAPPED_TABLE}:
+    if current not in {OLD_TABLE, PREVIOUS_NEW_TABLE, NEW_TABLE, PREVIOUS_SWAPPED_TABLE}:
         raise SystemExit(f"unexpected table at 0x{TABLE_OFF:X}: {current.hex(' ')}")
 
     data[TABLE_OFF : TABLE_OFF + len(OLD_TABLE)] = OLD_TABLE if args.revert else NEW_TABLE
@@ -100,7 +118,7 @@ def main() -> int:
         exe.write_bytes(data)
 
     print(("reverted" if args.revert else "patched"), exe)
-    print("Raceway slots: Raceway=French, Raceway 2=US/Canada, Raceway 3=German")
+    print("Snowy=US/Canada; Raceway=French, Raceway 2=US/Canada, Raceway 3=German")
     print(f"md5 {hashlib.md5(data).hexdigest().upper()}")
     return 0
 
