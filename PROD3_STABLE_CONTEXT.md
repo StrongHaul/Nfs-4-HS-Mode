@@ -520,3 +520,44 @@ Traffic reincarnation now uses the player as its only life-basis car:
 - traffic counts, release timing, and density remain unchanged.
 
 Implementation: `patch_prod3_traffic_respawn_player_only.py`.
+
+## Stable point: random HP night cop beacon source
+
+Confirmed by user on 2026-07-14:
+
+~~~text
+NFS4.EXE  9790E6B86C5D4C12773D61DF7B2A25C4
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+~~~
+
+At night in HP, an optional feature changes the environmental beacon-light
+source between the player cop and active AI cops. The selected source is held
+for about 171 simulation ticks, producing an observed interval of roughly
+4-5 seconds. The player participates only while the player cop strobes are on.
+
+The feature is disabled by default and controlled by:
+
+~~~text
+[Мои\Случайное переключение света мигалок в HP]
+Option = Выкл:0
+Option = Вкл:1
+8011F224 000?
+~~~
+
+The DuckStation option synchronizes both code-immediate gates:
+
+~~~text
+800F7A64 0000  off
+800F7AD4 0000  off
+800F7A64 0004  on
+800F7AD4 0004  on
+~~~
+
+Both gates must always use matching values. The timing code includes the PS1
+load-delay NOP after reading simGlobal.gameTicks; removing it makes the source
+effectively constant. Outside four-cop HP, selection remains stock.
+
+Implementation files:
+
+- patch_prod3_hp_random_cop_beacon.py
+- PROD3_hp_random_cop_beacon_toggle.cht
