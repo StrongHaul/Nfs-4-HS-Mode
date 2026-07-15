@@ -561,3 +561,26 @@ Implementation files:
 
 - patch_prod3_hp_random_cop_beacon.py
 - PROD3_hp_random_cop_beacon_toggle.cht
+
+## Stable point: second HP AI model selector options
+
+Confirmed by user on 2026-07-16:
+
+~~~text
+NFS4.EXE  9790E6B86C5D4C12773D61DF7B2A25C4
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+~~~
+
+`[Мои\Юнит X. Второй ИИ гонщик в HP]` now provides named model options for
+the existing `80054800` override:
+
+~~~text
+80054800 0000       stock behavior: same model as the first AI racer
+80054800 0001-0032  force the selected model ID
+~~~
+
+Model ID `00` (Mercedes SLK 230) is intentionally omitted from this selector,
+because `0000` is reserved by the stable runtime hook for stock/shared behavior.
+All IDs `01` through `32` remain available. The option list is stored in
+`PROD3_unit_car_model_selectors.cht` and is mirrored in the active DuckStation
+`NFS 4.cht` file.

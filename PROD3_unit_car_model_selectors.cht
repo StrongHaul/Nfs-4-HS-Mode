@@ -519,3 +519,60 @@ Option = 32 - Ford Falcon XR8:0x32
 80114E18 00??
 80118D98 00??
 
+
+[Мои\Юнит X. Второй ИИ гонщик в HP]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = По умолчанию - как у первого ИИ гонщика:0x00
+Option = 01 - BMW 23 Roadster 2.8:0x01
+Option = 02 - Holden HSV VT GTS:0x02
+Option = 03 - Ford Falcon XR8:0x03
+Option = 04 - Camaro Z28:0x04
+Option = 05 - Firebird T/A:0x05
+Option = 06 - Aston Martin DB7:0x06
+Option = 07 - Jaguar XKR:0x07
+Option = 08 - BMW M5:0x08
+Option = 09 - Corvette:0x09
+Option = 0A - 550 Maranello:0x0A
+Option = 0B - Porsche 911:0x0B
+Option = 0C - Ferrari F50:0x0C
+Option = 0D - Diablo SV:0x0D
+Option = 0E - Mercedes CLK-GTR:0x0E
+Option = 0F - McLaren F1 GTR:0x0F
+Option = 10 - Porsche 911 (Racer):0x10
+Option = 11 - MHRT VT Commodore:0x11
+Option = 12 - Corvette (Racer):0x12
+Option = 13 - Phantom:0x13
+Option = 14 - Titan:0x14
+Option = 15 - Nissan Skyline GT-R V-Spec:0x15
+Option = 16 - Caprice (Cop Car):0x16
+Option = 17 - Holden HSV VT GTS (Cop Car):0x17
+Option = 18 - BMW M5 (Cop Car):0x18
+Option = 19 - Corvette (Cop Car):0x19
+Option = 1A - Porsche 911 (Cop Car):0x1A
+Option = 1B - Diablo SV (Cop Car):0x1B
+Option = 1C - Police Helicopter:0x1C
+Option = 1D - Traffic Car No.1:0x1D
+Option = 1E - Traffic Car No.2:0x1E
+Option = 1F - Traffic Car No.3:0x1F
+Option = 20 - Traffic Car No.4 (Station Wagon):0x20
+Option = 21 - Traffic Car No.5 (School Bus):0x21
+Option = 22 - Traffic Car No.6 (Blazer):0x22
+Option = 23 - Traffic Car No.7:0x23
+Option = 24 - Traffic Car No.8 (Trash Truck):0x24
+Option = 25 - Traffic Car No.9 (Pickup Truck):0x25
+Option = 26 - Traffic Car No.10 (Big Truck No.1):0x26
+Option = 27 - Traffic Car No.11 (Big Truck No.2):0x27
+Option = 28 - Traffic Car No.12 (Mini Van):0x28
+Option = 29 - Traffic Car No.13:0x29
+Option = 2A - Traffic Car No.14:0x2A
+Option = 2B - Traffic Car No.15:0x2B
+Option = 2C - Traffic Car No.16 (Кросовер семейный):0x2C
+Option = 2D - Traffic Car No.17:0x2D
+Option = 2E - Traffic Car No.18 (Taxi):0x2E
+Option = 2F - Traffic Car No.19 (Greyhound Bus):0x2F
+Option = 30 - Traffic Car No.20 (Long Truck):0x30
+Option = 31 - Traffic Car No.21 (City Bus):0x31
+Option = 32 - Ford Falcon XR8:0x32
+80054800 00??
