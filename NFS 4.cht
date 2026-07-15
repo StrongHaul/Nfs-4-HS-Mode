@@ -1,0 +1,3640 @@
+[Мои\Масса ИИ гонщиков]
+Description = 1172 - на уровне полицейских Diablo
+Type = Gameshark
+Activation = EndFrame
+OptionRange = 1100:1500
+80055450 ????
+
+[Мои\Юнит 1. Игрок 1]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 1D - Traffic Car No.1:29
+Option = 1E - Traffic Car No.2:30
+Option = 1F - Traffic Car No.3:31
+Option = 20 - Traffic Car No.4 (Station Wagon):32
+Option = 21 - Traffic Car No.5 (School Bus):33
+Option = 22 - Traffic Car No.6 (Blazer):34
+Option = 23 - Traffic Car No.7:35
+Option = 24 - Traffic Car No.8 (Trash Truck):36
+Option = 25 - Traffic Car No.9 (Pickup Truck):37
+Option = 26 - Traffic Car No.10 (Big Truck No.1):38
+Option = 27 - Traffic Car No.11 (Big Truck No.2):39
+Option = 28 - Traffic Car No.12 (Mini Van):40
+Option = 29 - Traffic Car No.13:41
+Option = 2A - Traffic Car No.14:42
+Option = 2B - Traffic Car No.15:43
+Option = 2C - Traffic Car No.16 (Кросовер семейный):44
+Option = 2D - Traffic Car No.17:45
+Option = 2E - Traffic Car No.18 (Taxi):46
+Option = 2F - Traffic Car No.19 (Greyhound Bus):47
+Option = 30 - Traffic Car No.20 (Long Truck):48
+Option = 31 - Traffic Car No.21 (City Bus):49
+Option = 32 - Ford Falcon XR8:50
+30114878 00??
+
+[Мои\Без арестов]
+Type = Gameshark
+Activation = EndFrame
+8006380A 0801
+
+
+
+
+
+
+
+
+
+
+80063808 8E89
+
+[Мои\Юнит 7. Коп 4 / Трафик 1]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 1D - Traffic Car No.1:29
+Option = 1E - Traffic Car No.2:30
+Option = 1F - Traffic Car No.3:31
+Option = 20 - Traffic Car No.4 (Station Wagon):32
+Option = 21 - Traffic Car No.5 (School Bus):33
+Option = 22 - Traffic Car No.6 (Blazer):34
+Option = 23 - Traffic Car No.7:35
+Option = 24 - Traffic Car No.8 (Trash Truck):36
+Option = 25 - Traffic Car No.9 (Pickup Truck):37
+Option = 26 - Traffic Car No.10 (Big Truck No.1):38
+Option = 27 - Traffic Car No.11 (Big Truck No.2):39
+Option = 28 - Traffic Car No.12 (Mini Van):40
+Option = 29 - Traffic Car No.13:41
+Option = 2A - Traffic Car No.14:42
+Option = 2B - Traffic Car No.15:43
+Option = 2C - Traffic Car No.16 (Кросовер семейный):44
+Option = 2D - Traffic Car No.17:45
+Option = 2E - Traffic Car No.18 (Taxi):46
+Option = 2F - Traffic Car No.19 (Greyhound Bus):47
+Option = 30 - Traffic Car No.20 (Long Truck):48
+Option = 31 - Traffic Car No.21 (City Bus):49
+Option = 32 - Ford Falcon XR8:50
+80114CB0 00??
+80118C30 00??
+
+[Мои\Юнит 6. Коп 3]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 32 - Ford Falcon XR8:50
+80118B7C 00??
+80114BFC 00??
+
+[Мои\Юнит 5. Коп 2]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 32 - Ford Falcon XR8:50
+80114B48 00??
+80118AC8 00??
+
+[Мои\Юнит 4. Коп 1]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 32 - Ford Falcon XR8:50
+80118A14 00??
+80114A94 00??
+
+[Мои\Юнит 8. Трафик 2]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 1D - Traffic Car No.1:29
+Option = 1E - Traffic Car No.2:30
+Option = 1F - Traffic Car No.3:31
+Option = 20 - Traffic Car No.4 (Station Wagon):32
+Option = 21 - Traffic Car No.5 (School Bus):33
+Option = 22 - Traffic Car No.6 (Blazer):34
+Option = 23 - Traffic Car No.7:35
+Option = 24 - Traffic Car No.8 (Trash Truck):36
+Option = 25 - Traffic Car No.9 (Pickup Truck):37
+Option = 26 - Traffic Car No.10 (Big Truck No.1):38
+Option = 27 - Traffic Car No.11 (Big Truck No.2):39
+Option = 28 - Traffic Car No.12 (Mini Van):40
+Option = 29 - Traffic Car No.13:41
+Option = 2A - Traffic Car No.14:42
+Option = 2B - Traffic Car No.15:43
+Option = 2C - Traffic Car No.16 (Кросовер семейный):44
+Option = 2D - Traffic Car No.17:45
+Option = 2E - Traffic Car No.18 (Taxi):46
+Option = 2F - Traffic Car No.19 (Greyhound Bus):47
+Option = 30 - Traffic Car No.20 (Long Truck):48
+Option = 31 - Traffic Car No.21 (City Bus):49
+Option = 32 - Ford Falcon XR8:50
+80118CE4 00??
+80114D64 00??
+
+[Мои\Юнит 2. ИИ гонщик]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 32 - Ford Falcon XR8:50
+801188AC 00??
+8011492C 00??
+
+[Мои\Юнит 3]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 32 - Ford Falcon XR8:50
+801149E0 00??
+80118960 00??
+
+[Мои\Выбрать карту]
+Description = 0 - Германия. 1 - Франция. 2 - Канада. 3 - Англия. 4 - Шотландия. 5 - Бухта. 6 - Снежные Горы. 7 - raceway. 8 - raceway 2. 9 - raceway 3
+Type = Gameshark
+Activation = EndFrame
+OptionRange = 0:9
+801158DA 0?00
+
+[Мои\Режим игры]
+Description = 0 - Test Drive. 1 - Погоня. 2 - Single Race. 3 - Турнир. 4 - Special Event.
+Type = Gameshark
+Activation = EndFrame
+Option = Тест драйв:0
+Option = Погоня:1
+Option = Одиночная езда:2
+Option = Турнир:3
+Option = Специальная езда:4
+801158BC 000?
+
+[Мои\Расцветка моей полицейской машины]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = По стране:1
+Option = Кастомная:2
+800553F4 000?
+
+[Мои\Полицейская сирена]
+Type = Gameshark
+Activation = EndFrame
+Option = Обычная:0
+Option = Особая:1
+80055204 000?
+
+
+
+
+
+
+
+
+
+
+80055258 000?
+
+[Мои\Мигалки и сирена на гражданской машине]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F208 000?
+
+
+
+
+
+
+
+
+
+
+80055148 000?
+
+
+
+
+
+
+
+
+
+
+8005517C 000?
+
+
+
+
+
+
+
+
+
+
+800551B0 000?
+
+
+
+
+
+
+
+
+
+
+D011F208 0000
+
+
+
+
+
+
+
+
+
+
+80076554 0039
+
+
+
+
+
+
+
+
+
+
+D011F208 0000
+
+
+
+
+
+
+
+
+
+
+80076556 1040
+
+
+
+
+
+
+
+
+
+
+D011F208 0000
+
+
+
+
+
+
+
+
+
+
+80076568 0025
+
+
+
+
+
+
+
+
+
+
+D011F208 0000
+
+
+
+
+
+
+
+
+
+
+8007656A 1040
+
+
+
+
+
+
+
+
+
+
+D011F208 0001
+
+
+
+
+
+
+
+
+
+
+80076554 0000
+
+
+
+
+
+
+
+
+
+
+D011F208 0001
+
+
+
+
+
+
+
+
+
+
+80076556 0000
+
+
+
+
+
+
+
+
+
+
+D011F208 0001
+
+
+
+
+
+
+
+
+
+
+80076568 0000
+
+
+
+
+
+
+
+
+
+
+D011F208 0001
+
+
+
+
+
+
+
+
+
+
+8007656A 0000
+
+[Мои\Подсветка машин ночью]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+800552A0 000?
+
+[Мои\Больше трафика]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+80054B7C 000?
+
+[Мои\Юнит 9. Трафик 3]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = 00 - Mercedes SLK 230:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
+Option = 1D - Traffic Car No.1:29
+Option = 1E - Traffic Car No.2:30
+Option = 1F - Traffic Car No.3:31
+Option = 20 - Traffic Car No.4 (Station Wagon):32
+Option = 21 - Traffic Car No.5 (School Bus):33
+Option = 22 - Traffic Car No.6 (Blazer):34
+Option = 23 - Traffic Car No.7:35
+Option = 24 - Traffic Car No.8 (Trash Truck):36
+Option = 25 - Traffic Car No.9 (Pickup Truck):37
+Option = 26 - Traffic Car No.10 (Big Truck No.1):38
+Option = 27 - Traffic Car No.11 (Big Truck No.2):39
+Option = 28 - Traffic Car No.12 (Mini Van):40
+Option = 29 - Traffic Car No.13:41
+Option = 2A - Traffic Car No.14:42
+Option = 2B - Traffic Car No.15:43
+Option = 2C - Traffic Car No.16 (Кросовер семейный):44
+Option = 2D - Traffic Car No.17:45
+Option = 2E - Traffic Car No.18 (Taxi):46
+Option = 2F - Traffic Car No.19 (Greyhound Bus):47
+Option = 30 - Traffic Car No.20 (Long Truck):48
+Option = 31 - Traffic Car No.21 (City Bus):49
+Option = 32 - Ford Falcon XR8:50
+80114E18 00??
+80118D98 00??
+
+[Мои\Юнит X. Второй ИИ гонщик в HP]
+Description = Выберите шестнадцатеричный ID машины
+Type = Gameshark
+Activation = EndFrame
+Option = По умолчанию - как у первого ИИ гонщика:0x00
+Option = 01 - BMW 23 Roadster 2.8:0x01
+Option = 02 - Holden HSV VT GTS:0x02
+Option = 03 - Ford Falcon XR8:0x03
+Option = 04 - Camaro Z28:0x04
+Option = 05 - Firebird T/A:0x05
+Option = 06 - Aston Martin DB7:0x06
+Option = 07 - Jaguar XKR:0x07
+Option = 08 - BMW M5:0x08
+Option = 09 - Corvette:0x09
+Option = 0A - 550 Maranello:0x0A
+Option = 0B - Porsche 911:0x0B
+Option = 0C - Ferrari F50:0x0C
+Option = 0D - Diablo SV:0x0D
+Option = 0E - Mercedes CLK-GTR:0x0E
+Option = 0F - McLaren F1 GTR:0x0F
+Option = 10 - Porsche 911 (Racer):0x10
+Option = 11 - MHRT VT Commodore:0x11
+Option = 12 - Corvette (Racer):0x12
+Option = 13 - Phantom:0x13
+Option = 14 - Titan:0x14
+Option = 15 - Nissan Skyline GT-R V-Spec:0x15
+Option = 16 - Caprice (Cop Car):0x16
+Option = 17 - Holden HSV VT GTS (Cop Car):0x17
+Option = 18 - BMW M5 (Cop Car):0x18
+Option = 19 - Corvette (Cop Car):0x19
+Option = 1A - Porsche 911 (Cop Car):0x1A
+Option = 1B - Diablo SV (Cop Car):0x1B
+Option = 1C - Police Helicopter:0x1C
+Option = 32 - Ford Falcon XR8:0x32
+80054800 00??
+
+[Мои\Преследование копов]
+Type = Gameshark
+Activation = EndFrame
+Option = Всех:0
+Option = Только ботов:1
+800F7900 000?
+
+
+
+
+
+
+
+
+
+
+800F7980 000?
+
+[Мои\Я могу арестовать гонщиков]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+800F7A00 000?
+
+
+
+
+
+
+
+
+
+
+800F7B00 000?
+
+[Мои\Damage только визуальный]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F204 000?
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F098 FFE8
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F09A 27BD
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F09C 0010
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F09E AFB0
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F0A0 8021
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F0A2 0080
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F0A4 0014
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006F0A6 AFBF
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006C270 FFE8
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006C272 27BD
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006C274 0010
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006C276 AFBF
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006C278 0228
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+8006C27A 8C83
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AB710 021C
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AB712 8E24
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AB714 022C
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AB716 8E23
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD254 0218
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD256 8EA2
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD258 021C
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD25A 8EA3
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD264 0220
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD266 8EA3
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD268 023C
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD26A 8EA4
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD484 023C
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD486 8EA3
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD58C 0228
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD58E 8EA2
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD590 022C
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD592 8EA3
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD59C 0230
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD59E 8EA3
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD5A0 023C
+
+
+
+
+
+
+
+
+
+
+D011F204 0000
+
+
+
+
+
+
+
+
+
+
+800AD5A2 8EA4
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F098 0001
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F09A 3C02
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F09C 0778
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F09E AC82
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F0A0 0008
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F0A2 03E0
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F0A4 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006F0A6 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006C270 1021
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006C272 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006C274 0008
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006C276 03E0
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006C278 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+8006C27A 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AB710 2021
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AB712 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AB714 1821
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AB716 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD254 1021
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD256 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD258 1821
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD25A 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD264 1821
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD266 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD268 2021
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD26A 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD484 1821
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD486 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD58C 1021
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD58E 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD590 1821
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD592 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD59C 1821
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD59E 0000
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD5A0 2021
+
+
+
+
+
+
+
+
+
+
+D011F204 0001
+
+
+
+
+
+
+
+
+
+
+800AD5A2 0000
+
+[Мои\Количество кругов]
+Type = Gameshark
+Activation = EndFrame
+Option = 2 круга:2
+Option = 3 круга:3
+Option = 4 круга:4
+Option = 5 кругов:5
+Option = 6 кругов:6
+Option = 7 кругов:7
+Option = 8 кругов:8
+801144A8 000?
+
+
+
+
+
+
+
+
+
+
+80118428 000?
+
+[Мои\Изменение камер]
+Type = Gameshark
+Activation = EndFrame
+Option = Off:0
+Option = On:1
+8011F20C 000?
+D011F20C 0000
+801182C0 0013
+D011F20C 0000
+801182C2 0000
+D011F20C 0000
+801182C4 000A
+D011F20C 0000
+801182C6 0000
+D011F20C 0000
+801182C8 000B
+D011F20C 0000
+801182CA 0000
+D011F20C 0000
+801182CC 0008
+D011F20C 0000
+801182CE 0000
+D011F20C 0000
+801182D0 0009
+D011F20C 0000
+801182D2 0000
+D011F20C 0000
+801182D4 0006
+D011F20C 0000
+801182D6 0000
+D011F20C 0000
+801182D8 0004
+D011F20C 0000
+801182DA 0000
+D011F20C 0000
+801182DC 000F
+D011F20C 0000
+801182DE 0000
+D011F20C 0000
+801182E0 0000
+D011F20C 0000
+801182E2 0000
+D011F20C 0000
+80110830 0010
+D011F20C 0000
+80110832 0000
+D011F20C 0000
+80110828 6666
+D011F20C 0000
+8011082A 0000
+D011F20C 0000
+8011083C 3334
+D011F20C 0000
+8011083E FFFB
+D011F20C 0000
+80110844 0000
+D011F20C 0000
+80110846 0000
+D011F20C 0000
+80110848 2666
+D011F20C 0000
+8011084A 0001
+D011F20C 0000
+8011084C 3334
+D011F20C 0000
+8011084E FFFB
+D011F20C 0000
+80110858 2666
+D011F20C 0000
+8011085A 0001
+D011F20C 0000
+8011085C 3334
+D011F20C 0000
+8011085E FFFB
+D011F20C 0000
+80110878 0000
+D011F20C 0000
+8011087A 0002
+D011F20C 0000
+8011087C 0000
+D011F20C 0000
+8011087E FFFA
+D011F20C 0000
+80085408 0003
+D011F20C 0000
+80085414 6666
+D011F20C 0000
+80084174 0002
+D011F20C 0000
+80084176 2405
+D011F20C 0000
+80084188 2821
+D011F20C 0000
+8008418A 0000
+D011F20C 0000
+80084198 077C
+D011F20C 0000
+8008419A 0C02
+D011F20C 0000
+8008419C 0001
+D011F20C 0000
+8008419E 2405
+D011F20C 0000
+80081830 0CCC
+D011F20C 0000
+80081AD8 0001
+D011F20C 0000
+80081ADA 3C02
+D011F20C 0000
+80081AEC 4000
+D011F20C 0000
+80081AEE 2862
+D011F20C 0000
+80081AF4 4000
+D011F20C 0000
+80081AF6 2402
+D011F20C 0000
+80081AFC 0001
+D011F20C 0000
+80081AFE 3C02
+D011F20C 0000
+80081832 2415
+D011F20C 0000
+80081E78 0CCC
+D011F20C 0000
+80081E7A 2415
+D011F20C 0000
+80081F14 1999
+D011F20C 0000
+80081F16 2406
+D011F20C 0000
+80081F18 0CCC
+D011F20C 0000
+80081F1A 2406
+D011F20C 0000
+80082384 1999
+D011F20C 0000
+80082386 2415
+D011F20C 0000
+80082088 1023
+D011F20C 0000
+8008208A 0044
+D011F20C 0000
+80081FC8 028F
+D011F20C 0000
+80081FCA 2410
+D011F20C 0000
+800560D0 5998
+D011F20C 0000
+800560D2 8008
+D011F20C 0000
+800560DC 59A8
+D011F20C 0000
+800560DE 8008
+D011F20C 0001
+801182C0 0002
+D011F20C 0001
+801182C2 0000
+D011F20C 0001
+801182C4 0004
+D011F20C 0001
+801182C6 0000
+D011F20C 0001
+801182C8 0002
+D011F20C 0001
+801182CA 0000
+D011F20C 0001
+801182CC 0004
+D011F20C 0001
+801182CE 0000
+D011F20C 0001
+801182D0 0002
+D011F20C 0001
+801182D2 0000
+D011F20C 0001
+801182D4 0004
+D011F20C 0001
+801182D6 0000
+D011F20C 0001
+801182D8 0002
+D011F20C 0001
+801182DA 0000
+D011F20C 0001
+801182DC 0004
+D011F20C 0001
+801182DE 0000
+D011F20C 0001
+801182E0 0002
+D011F20C 0001
+801182E2 0000
+D011F20C 0001
+80114920 0002
+D011F20C 0001
+80114922 0000
+D011F20C 0001
+80114924 0004
+D011F20C 0001
+80114926 0000
+D011F20C 0001
+80110828 0000
+D011F20C 0001
+8011082A 0002
+D011F20C 0001
+80110830 0000
+D011F20C 0001
+80110832 0000
+D011F20C 0001
+8011083C 3334
+D011F20C 0001
+8011083E FFFB
+D011F20C 0001
+80110844 0000
+D011F20C 0001
+80110846 0000
+D011F20C 0001
+80110848 2666
+D011F20C 0001
+8011084A 0001
+D011F20C 0001
+8011084C 3334
+D011F20C 0001
+8011084E FFFB
+D011F20C 0001
+80110858 5000
+D011F20C 0001
+8011085A 0002
+D011F20C 0001
+8011085C 0000
+D011F20C 0001
+8011085E FFF8
+D011F20C 0001
+80110878 6000
+D011F20C 0001
+8011087A 0002
+D011F20C 0001
+8011087C 8000
+D011F20C 0001
+8011087E FFF7
+D011F20C 0001
+80085408 0002
+D011F20C 0001
+80085414 7FFF
+D011F20C 0001
+80084174 0001
+D011F20C 0001
+80084176 2405
+D011F20C 0001
+80084188 0001
+D011F20C 0001
+8008418A 2405
+D011F20C 0001
+80084198 05EA
+D011F20C 0001
+8008419A 0C02
+D011F20C 0001
+8008419C 0002
+D011F20C 0001
+8008419E 2405
+D011F20C 0001
+80081830 2000
+D011F20C 0001
+80081AD8 0001
+D011F20C 0001
+80081ADA 3C02
+D011F20C 0001
+80081AEC 4000
+D011F20C 0001
+80081AEE 2862
+D011F20C 0001
+80081AF4 4000
+D011F20C 0001
+80081AF6 2402
+D011F20C 0001
+80081AFC 0001
+D011F20C 0001
+80081AFE 3C02
+D011F20C 0001
+80081832 2415
+D011F20C 0001
+80081E78 7FFF
+D011F20C 0001
+80081E7A 2415
+D011F20C 0001
+80081F14 7FFF
+D011F20C 0001
+80081F16 2406
+D011F20C 0001
+80081F18 7FFF
+D011F20C 0001
+80081F1A 2406
+D011F20C 0001
+80082384 7FFF
+D011F20C 0001
+80082386 2415
+D011F20C 0001
+80082088 1021
+D011F20C 0001
+8008208A 0040
+D011F20C 0001
+80081FC8 7FFF
+D011F20C 0001
+80081FCA 2410
+D011F20C 0001
+800560D0 59A8
+D011F20C 0001
+800560D2 8008
+D011F20C 0001
+800560DC 59B8
+D011F20C 0001
+800560DE 8008
+
+[Мои\Low полигон машина у игрока]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F210 000?
+
+
+
+
+
+
+
+
+
+
+D011F210 0000
+
+
+
+
+
+
+
+
+
+
+800AFD00 08C0
+
+
+
+
+
+
+
+
+
+
+D011F210 0000
+
+
+
+
+
+
+
+
+
+
+800AFD02 A684
+
+
+
+
+
+
+
+
+
+
+D011F210 0001
+
+
+
+
+
+
+
+
+
+
+800AFD00 08B2
+
+
+
+
+
+
+
+
+
+
+D011F210 0001
+
+
+
+
+
+
+
+
+
+
+800AFD02 A284
+
+[Мои\Анимация поворота колес игрока]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F214 000?
+
+
+
+
+
+
+
+
+
+
+D011F214 0000
+
+
+
+
+
+
+
+
+
+
+800B0F90 0450
+
+
+
+
+
+
+
+
+
+
+D011F214 0000
+
+
+
+
+
+
+
+
+
+
+800B0F92 8EB0
+
+
+
+
+
+
+
+
+
+
+D011F214 0000
+
+
+
+
+
+
+
+
+
+
+800B1784 0450
+
+
+
+
+
+
+
+
+
+
+D011F214 0000
+
+
+
+
+
+
+
+
+
+
+800B1786 8EA2
+
+
+
+
+
+
+
+
+
+
+D011F214 0000
+
+
+
+
+
+
+
+
+
+
+800B17FC 0450
+
+
+
+
+
+
+
+
+
+
+D011F214 0000
+
+
+
+
+
+
+
+
+
+
+800B17FE 8EB0
+
+
+
+
+
+
+
+
+
+
+D011F214 0001
+
+
+
+
+
+
+
+
+
+
+800B0F90 8021
+
+
+
+
+
+
+
+
+
+
+D011F214 0001
+
+
+
+
+
+
+
+
+
+
+800B0F92 0000
+
+
+
+
+
+
+
+
+
+
+D011F214 0001
+
+
+
+
+
+
+
+
+
+
+800B1784 1021
+
+
+
+
+
+
+
+
+
+
+D011F214 0001
+
+
+
+
+
+
+
+
+
+
+800B1786 0000
+
+
+
+
+
+
+
+
+
+
+D011F214 0001
+
+
+
+
+
+
+
+
+
+
+800B17FC 8021
+
+
+
+
+
+
+
+
+
+
+D011F214 0001
+
+
+
+
+
+
+
+
+
+
+800B17FE 0000
+
+[Мои\Усиленное ускорение и скорость игрока]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F218 000?
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800A9FB0 0000
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800A9FB2 0000
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800A97AC 0001
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800A97AE 3C05
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800A97C4 2666
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800A97C6 34A5
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800AA00C 0013
+
+
+
+
+
+
+
+
+
+
+D011F218 0000
+
+
+
+
+
+
+
+
+
+
+800AA00E 3C02
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800A9FB0 1040
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800A9FB2 0002
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800A97AC 0002
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800A97AE 3C05
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800A97C4 8000
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800A97C6 34A5
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800AA00C 0018
+
+
+
+
+
+
+
+
+
+
+D011F218 0001
+
+
+
+
+
+
+
+
+
+
+800AA00E 3C02
+
+[Мои\Увеличенная масса коллизии игрока]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F21C 000?
+
+
+
+
+
+
+
+
+
+
+D011F21C 0000
+
+
+
+
+
+
+
+
+
+
+801144DC 0008
+
+
+
+
+
+
+
+
+
+
+D011F21C 0001
+
+
+
+
+
+
+
+
+
+
+801144DC 000A
+
+[Мои\Трафик уступает нетрафик-юнитам]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F220 000?
+
+
+
+
+
+
+
+
+
+
+D011F220 0000
+
+
+
+
+
+
+
+
+
+
+800664C8 0D78
+
+
+
+
+
+
+
+
+
+
+D011F220 0000
+
+
+
+
+
+
+
+
+
+
+800664D0 DB00
+
+
+
+
+
+
+
+
+
+
+D011F220 0000
+
+
+
+
+
+
+
+
+
+
+8006660A 1440
+
+
+
+
+
+
+
+
+
+
+D011F220 0001
+
+
+
+
+
+
+
+
+
+
+800664C8 0CC4
+
+
+
+
+
+
+
+
+
+
+D011F220 0001
+
+
+
+
+
+
+
+
+
+
+800664D0 DAEC
+
+
+
+
+
+
+
+
+
+
+D011F220 0001
+
+
+
+
+
+
+
+
+
+
+8006660A 1000
+
+[Мои\Случайное переключение света мигалок в HP]
+Type = Gameshark
+Activation = EndFrame
+Option = Выкл:0
+Option = Вкл:1
+8011F224 000?
+D011F224 0000
+800F7A64 0000
+D011F224 0000
+800F7AD4 0000
+D011F224 0001
+800F7A64 0004
+D011F224 0001
+800F7AD4 0004
+
