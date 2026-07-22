@@ -52,7 +52,6 @@ Option = 2E - Traffic Car No.18 (Taxi):0x2E
 Option = 2F - Traffic Car No.19 (Greyhound Bus):0x2F
 Option = 30 - Traffic Car No.20 (Long Truck):0x30
 Option = 31 - Traffic Car No.21 (City Bus):0x31
-Option = 32 - Ford Falcon XR8:0x32
 30114878 00??
 
 [Мои\Юнит 7. Коп 4 / Трафик 1]
@@ -109,7 +108,6 @@ Option = 2E - Traffic Car No.18 (Taxi):0x2E
 Option = 2F - Traffic Car No.19 (Greyhound Bus):0x2F
 Option = 30 - Traffic Car No.20 (Long Truck):0x30
 Option = 31 - Traffic Car No.21 (City Bus):0x31
-Option = 32 - Ford Falcon XR8:0x32
 80114CB0 00??
 80118C30 00??
 
@@ -146,7 +144,6 @@ Option = 19 - Corvette (Cop Car):0x19
 Option = 1A - Porsche 911 (Cop Car):0x1A
 Option = 1B - Diablo SV (Cop Car):0x1B
 Option = 1C - Police Helicopter:0x1C
-Option = 32 - Ford Falcon XR8:0x32
 80118B7C 00??
 80114BFC 00??
 
@@ -183,7 +180,6 @@ Option = 19 - Corvette (Cop Car):0x19
 Option = 1A - Porsche 911 (Cop Car):0x1A
 Option = 1B - Diablo SV (Cop Car):0x1B
 Option = 1C - Police Helicopter:0x1C
-Option = 32 - Ford Falcon XR8:0x32
 80114B48 00??
 80118AC8 00??
 
@@ -220,7 +216,6 @@ Option = 19 - Corvette (Cop Car):0x19
 Option = 1A - Porsche 911 (Cop Car):0x1A
 Option = 1B - Diablo SV (Cop Car):0x1B
 Option = 1C - Police Helicopter:0x1C
-Option = 32 - Ford Falcon XR8:0x32
 80118A14 00??
 80114A94 00??
 
@@ -278,7 +273,6 @@ Option = 2E - Traffic Car No.18 (Taxi):0x2E
 Option = 2F - Traffic Car No.19 (Greyhound Bus):0x2F
 Option = 30 - Traffic Car No.20 (Long Truck):0x30
 Option = 31 - Traffic Car No.21 (City Bus):0x31
-Option = 32 - Ford Falcon XR8:0x32
 80118CE4 00??
 80114D64 00??
 
@@ -315,7 +309,6 @@ Option = 19 - Corvette (Cop Car):0x19
 Option = 1A - Porsche 911 (Cop Car):0x1A
 Option = 1B - Diablo SV (Cop Car):0x1B
 Option = 1C - Police Helicopter:0x1C
-Option = 32 - Ford Falcon XR8:0x32
 801188AC 00??
 8011492C 00??
 
@@ -352,7 +345,6 @@ Option = 19 - Corvette (Cop Car):0x19
 Option = 1A - Porsche 911 (Cop Car):0x1A
 Option = 1B - Diablo SV (Cop Car):0x1B
 Option = 1C - Police Helicopter:0x1C
-Option = 32 - Ford Falcon XR8:0x32
 801149E0 00??
 80118960 00??
 
@@ -410,7 +402,6 @@ Option = 2E - Traffic Car No.18 (Taxi):0x2E
 Option = 2F - Traffic Car No.19 (Greyhound Bus):0x2F
 Option = 30 - Traffic Car No.20 (Long Truck):0x30
 Option = 31 - Traffic Car No.21 (City Bus):0x31
-Option = 32 - Ford Falcon XR8:0x32
 80114E18 00??
 80118D98 00??
 
@@ -448,5 +439,4 @@ Option = 19 - Corvette (Cop Car):0x19
 Option = 1A - Porsche 911 (Cop Car):0x1A
 Option = 1B - Diablo SV (Cop Car):0x1B
 Option = 1C - Police Helicopter:0x1C
-Option = 32 - Ford Falcon XR8:0x32
 80054800 00??

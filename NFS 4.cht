@@ -59,7 +59,6 @@ Option = 2E - Traffic Car No.18 (Taxi):46
 Option = 2F - Traffic Car No.19 (Greyhound Bus):47
 Option = 30 - Traffic Car No.20 (Long Truck):48
 Option = 31 - Traffic Car No.21 (City Bus):49
-Option = 32 - Ford Falcon XR8:50
 30114878 00??
 
 [Мои\Без арестов]
@@ -132,7 +131,6 @@ Option = 2E - Traffic Car No.18 (Taxi):46
 Option = 2F - Traffic Car No.19 (Greyhound Bus):47
 Option = 30 - Traffic Car No.20 (Long Truck):48
 Option = 31 - Traffic Car No.21 (City Bus):49
-Option = 32 - Ford Falcon XR8:50
 80114CB0 00??
 80118C30 00??
 
@@ -169,7 +167,6 @@ Option = 19 - Corvette (Cop Car):25
 Option = 1A - Porsche 911 (Cop Car):26
 Option = 1B - Diablo SV (Cop Car):27
 Option = 1C - Police Helicopter:28
-Option = 32 - Ford Falcon XR8:50
 80118B7C 00??
 80114BFC 00??
 
@@ -206,7 +203,6 @@ Option = 19 - Corvette (Cop Car):25
 Option = 1A - Porsche 911 (Cop Car):26
 Option = 1B - Diablo SV (Cop Car):27
 Option = 1C - Police Helicopter:28
-Option = 32 - Ford Falcon XR8:50
 80114B48 00??
 80118AC8 00??
 
@@ -243,7 +239,6 @@ Option = 19 - Corvette (Cop Car):25
 Option = 1A - Porsche 911 (Cop Car):26
 Option = 1B - Diablo SV (Cop Car):27
 Option = 1C - Police Helicopter:28
-Option = 32 - Ford Falcon XR8:50
 80118A14 00??
 80114A94 00??
 
@@ -301,7 +296,6 @@ Option = 2E - Traffic Car No.18 (Taxi):46
 Option = 2F - Traffic Car No.19 (Greyhound Bus):47
 Option = 30 - Traffic Car No.20 (Long Truck):48
 Option = 31 - Traffic Car No.21 (City Bus):49
-Option = 32 - Ford Falcon XR8:50
 80118CE4 00??
 80114D64 00??
 
@@ -338,7 +332,6 @@ Option = 19 - Corvette (Cop Car):25
 Option = 1A - Porsche 911 (Cop Car):26
 Option = 1B - Diablo SV (Cop Car):27
 Option = 1C - Police Helicopter:28
-Option = 32 - Ford Falcon XR8:50
 801188AC 00??
 8011492C 00??
 
@@ -375,7 +368,6 @@ Option = 19 - Corvette (Cop Car):25
 Option = 1A - Porsche 911 (Cop Car):26
 Option = 1B - Diablo SV (Cop Car):27
 Option = 1C - Police Helicopter:28
-Option = 32 - Ford Falcon XR8:50
 801149E0 00??
 80118960 00??
 
@@ -707,7 +699,6 @@ Option = 2E - Traffic Car No.18 (Taxi):46
 Option = 2F - Traffic Car No.19 (Greyhound Bus):47
 Option = 30 - Traffic Car No.20 (Long Truck):48
 Option = 31 - Traffic Car No.21 (City Bus):49
-Option = 32 - Ford Falcon XR8:50
 80114E18 00??
 80118D98 00??
 
@@ -744,7 +735,6 @@ Option = 19 - Corvette (Cop Car):0x19
 Option = 1A - Porsche 911 (Cop Car):0x1A
 Option = 1B - Diablo SV (Cop Car):0x1B
 Option = 1C - Police Helicopter:0x1C
-Option = 32 - Ford Falcon XR8:0x32
 80054800 00??
 
 [Мои\Преследование копов]
@@ -3638,3 +3628,49 @@ D011F224 0001
 D011F224 0001
 800F7AD4 0004
 
+[Мои\HP. Количество ИИ гонщиков]
+Description = Экспериментально; общее число гонщиков включает игрока
+Type = Gameshark
+Activation = EndFrame
+Option = 2 ИИ гонщика (стандарт PROD3):0x3
+Option = 3 ИИ гонщика:0x4
+Option = 4 ИИ гонщика:0x5
+Option = 5 ИИ гонщиков:0x6
+Option = 6 ИИ гонщиков:0x7
+A7028658 0007A19E
+A702865A 10640800
+A7028774 00050000
+A7028776 14620000
+A70F76F0 000A0000
+A70F76F2 15600000
+A70F76F8 00080000
+A70F76FA 15C30000
+A70F7704 00050000
+A70F7706 11600000
+A70F76FC 00040004
+D00F76FE 340E
+300F76FC 000?
+
+[Мои\HP. Количество ИИ копов]
+Description = Экспериментально; максимум 4
+Type = Gameshark
+Activation = EndFrame
+Option = 0 копов:0
+Option = 1 коп:1
+Option = 2 копа:2
+Option = 3 копа:3
+Option = 4 копа (стандарт PROD3):4
+A7028F54 00040004
+D0028F56 2402
+30028F54 000?
+
+[Мои\HP. Количество трафика]
+Description = Экспериментально; точная схема кодов HP day/night
+Type = Gameshark
+Activation = EndFrame
+Option = 1 машина:1
+Option = 2 машины (стандарт PROD3):2
+D1052EF6 00000000
+800294B8 000?
+D1052EF6 00000000
+800294BC 000?
