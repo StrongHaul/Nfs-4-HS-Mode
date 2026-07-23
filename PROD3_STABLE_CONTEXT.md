@@ -584,3 +584,33 @@ because `0000` is reserved by the stable runtime hook for stock/shared behavior.
 All IDs `01` through `32` remain available. The option list is stored in
 `PROD3_unit_car_model_selectors.cht` and is mirrored in the active DuckStation
 `NFS 4.cht` file.
+## Stable point: configurable HP cop beacon-light distribution
+
+Confirmed by user on 2026-07-24:
+
+~~~text
+NFS4.EXE  081501F9E01FE33C456AD826232254FA
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 91F0F5FC04132BB1C013F182398C4B57
+~~~
+
+The HP night beacon-light selector now provides four modes:
+
+~~~text
+0  stock/off
+1  one held pseudo-random source
+2  rapid distribution across all active AI cops
+3  a held pseudo-random pair of eligible cop cars
+~~~
+
+Pair mode scans the player slot and four AI-cop slots. It excludes inactive
+cars and cars whose beacon damage bit `car+0x87E & 4` is set. The player
+participates when driving a cop car with active, working strobes. If only two
+eligible sources remain, that pair stays selected.
+
+The extended selector runs at `0x80054D00`. It preserves the stock loop
+registers `t0-t4`; clobbering `t0` corrupts the cop-list pointer and causes
+invalid reads at `0x8007E468`, `0x8007E480`, and `0x8007E494`.
+
+The abandoned close-camera cheat and its `Camera_SetMode` hook were removed.
+The map-selection cheat at `801158DA` was also removed from `NFS 4.cht`.
