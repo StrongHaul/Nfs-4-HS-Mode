@@ -646,3 +646,22 @@ to their pre-camera values.
 
 The active DuckStation cheat file and the project copy of `NFS 4.cht` have
 the same MD5.
+## Stable point: stock replay cameras
+
+Confirmed by user on 2026-07-25:
+
+~~~text
+NFS4.EXE  572B1D32967A0976BED280B84257296E
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 2B46747E56E852C7D7C81B372E14E418
+~~~
+
+Replay camera switching and its camera table are restored to stock:
+
+~~~text
+19, 10, 11, 8, 9, 6, 4, 15, 0
+~~~
+
+The replay path no longer substitutes the player's gameplay camera modes.
+The adjusted near gameplay camera, stock far gameplay camera, and permanent
+replay HUD auto-hide behavior remain unchanged.
