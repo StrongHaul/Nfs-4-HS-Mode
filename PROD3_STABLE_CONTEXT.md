@@ -614,3 +614,16 @@ invalid reads at `0x8007E468`, `0x8007E480`, and `0x8007E494`.
 
 The abandoned close-camera cheat and its `Camera_SetMode` hook were removed.
 The map-selection cheat at `801158DA` was also removed from `NFS 4.cht`.
+## Stable point: Australian police livery in Scotland
+
+Confirmed by user on 2026-07-24:
+
+~~~text
+NFS4.EXE  821353C9879AE259B395BD953F436CF2
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 91F0F5FC04132BB1C013F182398C4B57
+~~~
+
+With player cop-livery mode `800553F4 0001`, Scotland/Celtic now selects
+country slot `03` (Australian). Snowy Ridge remains US/Canada, while the
+Raceway mappings remain French, US/Canada, and German respectively.

@@ -47,7 +47,7 @@ TRACK_COUNTRY_SLOTS = bytes([
     4,  # Coastal
     1,  # France
     4,  # Park / Canada
-    0,  # Celtic
+    3,  # Celtic / Scotland / Australian
     2,  # Germany
     0,  # UK
     4,  # GT1 / Raceway 2
@@ -61,6 +61,9 @@ TRACK_COUNTRY_SLOTS = bytes([
 ])
 # Previous stable table, retained so the patch can be reapplied over it.
 PREVIOUS_TRACK_COUNTRY_SLOTS = bytes([
+    4, 4, 4, 1, 4, 0, 2, 0, 4, 1, 2, 0, 0, 0, 0, 0,
+])
+LEGACY_TRACK_COUNTRY_SLOTS = bytes([
     2, 4, 4, 1, 4, 0, 2, 0, 4, 1, 2, 0, 0, 0, 0, 0,
 ])
 
@@ -248,6 +251,9 @@ def cave(track_country_slots: bytes = TRACK_COUNTRY_SLOTS) -> bytes:
 def previous_track_country_cave() -> bytes:
     return cave(PREVIOUS_TRACK_COUNTRY_SLOTS)
 
+def legacy_track_country_cave() -> bytes:
+    return cave(LEGACY_TRACK_COUNTRY_SLOTS)
+
 
 def old_custom_only_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
@@ -395,6 +401,7 @@ def main() -> int:
         b"\x00" * PLAYER_LIVERY_CAVE_LEN,
         new_cave,
         previous_track_country_cave(),
+        legacy_track_country_cave(),
         broken_mode_cave,
         old_custom_only_cave(),
         old_ai_cop_country_cave(),
