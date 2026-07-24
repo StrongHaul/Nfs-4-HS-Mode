@@ -627,3 +627,22 @@ NFS 4.cht 91F0F5FC04132BB1C013F182398C4B57
 With player cop-livery mode `800553F4 0001`, Scotland/Celtic now selects
 country slot `03` (Australian). Snowy Ridge remains US/Canada, while the
 Raceway mappings remain French, US/Canada, and German respectively.
+## Stable point: stock far camera and adjusted near camera
+
+Confirmed by user on 2026-07-25:
+
+~~~text
+NFS4.EXE  5F9831602BE3B268C487AF78F2F996F2
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 12AA6F7F3865D50EF52D88E48F2CB0A8
+~~~
+
+When `[Мои\Изменение камер]` is enabled, the near gameplay camera remains
+the custom mode `2` and uses a slightly increased distance of `-5.2`
+(`8011083C/3E = CCCD/FFFA`). The gameplay far-camera assignment at
+`80114924/26` is no longer overwritten, so the game retains its stock far
+camera. The permanent shared camera constants in `NFS4.EXE` were restored
+to their pre-camera values.
+
+The active DuckStation cheat file and the project copy of `NFS 4.cht` have
+the same MD5.
