@@ -77,7 +77,7 @@ Activation = EndFrame
 
 80063808 8E89
 
-[Мои\Юнит 7. Коп 4 / Трафик 1]
+[Мои\Юнит 7. Коп / Трафик]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
@@ -134,7 +134,7 @@ Option = 31 - Traffic Car No.21 (City Bus):49
 80114CB0 00??
 80118C30 00??
 
-[Мои\Юнит 6. Коп 3]
+[Мои\Юнит 6. Коп]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
@@ -170,7 +170,7 @@ Option = 1C - Police Helicopter:28
 80118B7C 00??
 80114BFC 00??
 
-[Мои\Юнит 5. Коп 2]
+[Мои\Юнит 5. Коп]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
@@ -206,7 +206,7 @@ Option = 1C - Police Helicopter:28
 80114B48 00??
 80118AC8 00??
 
-[Мои\Юнит 4. Коп 1]
+[Мои\Юнит 4. Коп / ИИ гонщик]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
@@ -242,7 +242,7 @@ Option = 1C - Police Helicopter:28
 80118A14 00??
 80114A94 00??
 
-[Мои\Юнит 8. Трафик 2]
+[Мои\Юнит 8. Трафик]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
@@ -335,7 +335,7 @@ Option = 1C - Police Helicopter:28
 801188AC 00??
 8011492C 00??
 
-[Мои\Юнит 3]
+[Мои\Юнит 3. ИИ гонщик]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
@@ -638,7 +638,7 @@ Option = Выкл:0
 Option = Вкл:1
 80054B7C 000?
 
-[Мои\Юнит 9. Трафик 3]
+[Мои\Юнит 9. Трафик]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
@@ -695,39 +695,39 @@ Option = 31 - Traffic Car No.21 (City Bus):49
 80114E18 00??
 80118D98 00??
 
-[Мои\Юнит X. Второй ИИ гонщик в HP]
+[Мои\Юнит 3 (только HP). ИИ гонщик]
 Description = Выберите шестнадцатеричный ID машины
 Type = Gameshark
 Activation = EndFrame
-Option = По умолчанию - как у первого ИИ гонщика:0x00
-Option = 01 - BMW 23 Roadster 2.8:0x01
-Option = 02 - Holden HSV VT GTS:0x02
-Option = 03 - Ford Falcon XR8:0x03
-Option = 04 - Camaro Z28:0x04
-Option = 05 - Firebird T/A:0x05
-Option = 06 - Aston Martin DB7:0x06
-Option = 07 - Jaguar XKR:0x07
-Option = 08 - BMW M5:0x08
-Option = 09 - Corvette:0x09
-Option = 0A - 550 Maranello:0x0A
-Option = 0B - Porsche 911:0x0B
-Option = 0C - Ferrari F50:0x0C
-Option = 0D - Diablo SV:0x0D
-Option = 0E - Mercedes CLK-GTR:0x0E
-Option = 0F - McLaren F1 GTR:0x0F
-Option = 10 - Porsche 911 (Racer):0x10
-Option = 11 - MHRT VT Commodore:0x11
-Option = 12 - Corvette (Racer):0x12
-Option = 13 - Phantom:0x13
-Option = 14 - Titan:0x14
-Option = 15 - Nissan Skyline GT-R V-Spec:0x15
-Option = 16 - Caprice (Cop Car):0x16
-Option = 17 - Holden HSV VT GTS (Cop Car):0x17
-Option = 18 - BMW M5 (Cop Car):0x18
-Option = 19 - Corvette (Cop Car):0x19
-Option = 1A - Porsche 911 (Cop Car):0x1A
-Option = 1B - Diablo SV (Cop Car):0x1B
-Option = 1C - Police Helicopter:0x1C
+Option = По умолчанию - как у первого ИИ гонщика:0
+Option = 01 - BMW 23 Roadster 2.8:1
+Option = 02 - Holden HSV VT GTS:2
+Option = 03 - Ford Falcon XR8:3
+Option = 04 - Camaro Z28:4
+Option = 05 - Firebird T/A:5
+Option = 06 - Aston Martin DB7:6
+Option = 07 - Jaguar XKR:7
+Option = 08 - BMW M5:8
+Option = 09 - Corvette:9
+Option = 0A - 550 Maranello:10
+Option = 0B - Porsche 911:11
+Option = 0C - Ferrari F50:12
+Option = 0D - Diablo SV:13
+Option = 0E - Mercedes CLK-GTR:14
+Option = 0F - McLaren F1 GTR:15
+Option = 10 - Porsche 911 (Racer):16
+Option = 11 - MHRT VT Commodore:17
+Option = 12 - Corvette (Racer):18
+Option = 13 - Phantom:19
+Option = 14 - Titan:20
+Option = 15 - Nissan Skyline GT-R V-Spec:21
+Option = 16 - Caprice (Cop Car):22
+Option = 17 - Holden HSV VT GTS (Cop Car):23
+Option = 18 - BMW M5 (Cop Car):24
+Option = 19 - Corvette (Cop Car):25
+Option = 1A - Porsche 911 (Cop Car):26
+Option = 1B - Diablo SV (Cop Car):27
+Option = 1C - Police Helicopter:28
 80054800 00??
 
 [Мои\Преследование копов]
@@ -3356,14 +3356,14 @@ D011F224 0003
 800F7AD4 0003
 
 [Мои\HP. Количество ИИ гонщиков]
-Description = Экспериментально; общее число гонщиков включает игрока
+Description = Экспериментально
 Type = Gameshark
 Activation = EndFrame
-Option = 2 ИИ гонщика (стандарт PROD3):0x3
-Option = 3 ИИ гонщика:0x4
-Option = 4 ИИ гонщика:0x5
-Option = 5 ИИ гонщиков:0x6
-Option = 6 ИИ гонщиков:0x7
+Option = 2 ИИ гонщика (стандарт PROD3):3
+Option = 3 ИИ гонщика:4
+Option = 4 ИИ гонщика:5
+Option = 5 ИИ гонщиков:6
+Option = 6 ИИ гонщиков:7
 D01158BC 0001
 A7028658 0007A19E
 D01158BC 0001
@@ -3388,9 +3388,31 @@ D01158BC 0001
 A70F76FC 00040004
 D01158BC 0001
 300F76FC 000?
+D11158BC 0001
+80028658 0007
+D11158BC 0001
+8002865A 1064
+D11158BC 0001
+80028774 0005
+D11158BC 0001
+80028776 1462
+D11158BC 0001
+800F76F0 000A
+D11158BC 0001
+800F76F2 1560
+D11158BC 0001
+800F76F8 0008
+D11158BC 0001
+800F76FA 15C3
+D11158BC 0001
+800F7704 0005
+D11158BC 0001
+800F7706 1160
+D11158BC 0001
+800F76FC 0004
 
 [Мои\HP. Количество ИИ копов]
-Description = Экспериментально; максимум 4
+Description = Экспериментально
 Type = Gameshark
 Activation = EndFrame
 Option = 0 копов:0
@@ -3403,7 +3425,7 @@ D0028F56 2402
 30028F54 000?
 
 [Мои\HP. Количество трафика]
-Description = Экспериментально; точная схема кодов HP day/night
+Description = Экспериментально
 Type = Gameshark
 Activation = EndFrame
 Option = 1 машина:1

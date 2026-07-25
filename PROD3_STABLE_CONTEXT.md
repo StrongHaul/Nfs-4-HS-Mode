@@ -9,6 +9,18 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 ```
 
 ## Стабильная версия
+Stable point confirmed by user on 2026-07-25 (HP racer-count cheat safely restores frontend code outside HP):
+
+```text
+NFS4.EXE  572B1D32967A0976BED280B84257296E
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 5FAE2B0E2C74E3F3C7A328B98638BADD
+```
+
+- `[Мои\HP. Количество ИИ гонщиков]` applies roster patches only when `frontEnd.raceType == 1`.
+- When `frontEnd.raceType != 1`, the cheat restores all affected frontend and CE-mod halfwords, preventing the HP patch from leaking into Test Drive and other modes.
+- Confirmed by user: Test Drive no longer hangs at `PC=0xA0010000` while the HP racer-count cheat is active.
+- The current cheat list also includes the user's updated Unit names and decimal option values; it contains exactly 10 Unit sections.
 
 Stable point confirmed by user on 2026-07-06 (traffic yield converted to toggle cheat):
 
