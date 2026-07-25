@@ -717,3 +717,30 @@ D01158BC 0001
 `801158BC = 1` identifies Hot Pursuit. The cheat therefore does not patch
 the opponent-roster initialization while Test Drive or another race type is
 active, preventing the Test Drive load failure at `PC=0xA0010000`.
+## Stable point: AI racer difficulty selector
+
+Confirmed by user on 2026-07-25:
+
+~~~text
+NFS4.EXE  43A90E86D7AB5AD2DC37125A5CBB3FE6
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 8092A4338A05B40D116D6462F1C9E0E9
+~~~
+
+`[Мои\Сложность ИИ гонщиков]` uses the independent selector:
+
+~~~text
+8011F228 0000  Стандарт
+8011F228 0001  Усиленные (+25%)
+8011F228 0002  Агрессивные (+50%)
+~~~
+
+Mode `0` preserves the stock opponent speed and attack calculations. Mode
+`1` increases the calculated target speed of AI racers by approximately
+25%. Mode `2` increases it by approximately 50% and maximizes the stock
+rear-bump/smack attack probability when the normal geometric conditions
+allow an attack.
+
+The hooks are installed at `0x8006E65C`, `0x80063F18`, and `0x80063F6C`;
+their shared code is stored at `0x80054C44`. They do not alter race rosters,
+cop counts, traffic, car models, or time-of-day selection.
