@@ -665,3 +665,24 @@ Replay camera switching and its camera table are restored to stock:
 The replay path no longer substitutes the player's gameplay camera modes.
 The adjusted near gameplay camera, stock far gameplay camera, and permanent
 replay HUD auto-hide behavior remain unchanged.
+## Stable point: minimal near-camera cheat
+
+Confirmed by user on 2026-07-25:
+
+~~~text
+NFS4.EXE  572B1D32967A0976BED280B84257296E
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 6636426D8A4905579498CFE23FB1AEB1
+~~~
+
+`[Мои\Изменение камер]` now has short Russian options:
+
+~~~text
+Выкл
+Фикс. камера 2
+~~~
+
+The legacy replay, far-camera, camera-dispatch, and smoothing writes were
+removed from this cheat. Its enabled branch changes only the near gameplay
+camera and sets its distance to approximately `-5.4`
+(`8011083C/3E = 999A/FFFA`). The stock far and replay cameras are untouched.
