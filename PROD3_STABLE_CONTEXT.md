@@ -744,3 +744,25 @@ allow an attack.
 The hooks are installed at `0x8006E65C`, `0x80063F18`, and `0x80063F6C`;
 their shared code is stored at `0x80054C44`. They do not alter race rosters,
 cop counts, traffic, car models, or time-of-day selection.
+
+## Stable point: two-position gameplay camera cycle
+
+Confirmed by user on 2026-07-26:
+
+~~~text
+NFS4.EXE  FFE4DB4BB97B71327C4C596400A28B14
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 49B5DD963400DC8EA0C9377AF761B009
+~~~
+
+`[Мои\Изменение камер]` now has the options `Выкл` and `Вкл` and the
+Russian description `Две камеры в гонке: ближняя -6.0 и штатная дальняя`.
+
+When selector `8011F20C` is enabled for player 0, the Camera_NextMode hook
+at `0x80086420` alternates only internal gameplay modes `2` and `6`: the
+tuned near camera at distance `-6.0` and the stock far HeliCam. It does not
+read the replay camera table or the mutable GameSetup Camera slots. When the
+selector is disabled, the original modulo-three camera cycle is preserved.
+Split-screen player 2 also retains the stock cycle.
+
+The hook code is stored at `0x80054CAC`.
