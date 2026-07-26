@@ -9,6 +9,21 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 ```
 
 ## Стабильная версия
+Stable point confirmed by user on 2026-07-26 (police siren selector no longer rewrites live code):
+
+```text
+NFS4.EXE  1958E822A8B6194B4EBD195FFBE759BC
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 0194AF17D22D4708D43B019D94E4E87C
+```
+
+- `[Мои\Полицейская сирена]` now writes only selector `8011F22C`:
+  - `0000` selects the normal siren;
+  - `0001` selects the special siren.
+- Siren code at `80055204` and `80055258` reads the selector as data and is no longer rewritten every `EndFrame`.
+- Confirmed by the user: selecting `Особая` no longer causes DuckStation instruction-read failures at `PC=0x80055204`.
+- Experimental full AI physics/collision hooks were rejected and removed.
+
 Stable point confirmed by user on 2026-07-25 (HP racer-count cheat safely restores frontend code outside HP):
 
 ```text
