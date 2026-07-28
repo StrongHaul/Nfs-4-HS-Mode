@@ -9,6 +9,19 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 ```
 
 ## Стабильная версия
+Stable point confirmed by user on 2026-07-28 (adjustable AI full-physics distance):
+
+```text
+NFS4.EXE  FD06F5A5B70C0CD774DD5A9A6976EA01
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 18192F8460AC3AF3AB223707ACD6D701
+```
+
+- `[Мои\Дальность полной физики ИИ]` controls how far AI cars retain full physics and collisions.
+- Options set the full-physics distance to stock (~72 m), 200 m, 300 m, 400 m, or 500 m.
+- The following partial-processing limits are approximately 96 m, 267 m, 400 m, 533 m, and 667 m.
+- The cheat changes only RAM thresholds at `8011F230` and `8011F234`; it does not rewrite executable instructions every frame.
+- A permanent helper at `800551D0` reads these thresholds from RAM. Stock thresholds are initialized in `NFS4.EXE`, so the default behavior is safe without the cheat.
 Stable point confirmed by user on 2026-07-26 (police siren selector no longer rewrites live code):
 
 ```text
