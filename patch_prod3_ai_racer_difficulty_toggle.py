@@ -57,15 +57,17 @@ def build_cave() -> tuple[bytes, int, int]:
     ]
 
     aggression_addr = speed_addr + len(speed_words) * 4
+    # Keep the stock path/line mask for every difficulty. The old mode 2
+    # cleared a0 here, which made racers pace the player on the same line.
     aggression_words = [
-        0x3C1A8012,
-        0x975AF228,
-        0x2F5A0002,
-        branch(0x05, 26, 0, aggression_addr + 0x0C, aggression_addr + 0x18),
-        0x00000000,
-        0x00002021,
         0x00641824,
         0x03E00008,
+        0x00000000,
+        0x00000000,
+        0x00000000,
+        0x00000000,
+        0x00000000,
+        0x00000000,
         0x00000000,
     ]
     blob = b"".join(word(value) for value in speed_words + aggression_words)

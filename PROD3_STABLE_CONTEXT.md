@@ -9,6 +9,17 @@ PROD 3 версия. DuckStation. Need for Speed - High Stakes (USA) — Мод 
 ```
 
 ## Стабильная версия
+Stable point confirmed by user on 2026-08-09 (AI speed mode no longer paces the player on the same racing line):
+
+```text
+NFS4.EXE  56615FCCB2401BC968E9F27E90D21084
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 20170BE3393AED4744A526791DEF88FB
+```
+
+- `[Мои\Скорость ИИ гонщиков]` provides stock, +25%, and +50% opponent top-speed modes through `8011F228`.
+- Mode `2` retains the +50% speed multiplier but no longer clears the stock path/line mask at `80063F18` and `80063F6C`.
+- Confirmed by the user: AI racers no longer slow down to approximately the player's speed when driving alongside the player on the same racing line.
 Stable point confirmed by user on 2026-07-28 (adjustable AI full-physics distance):
 
 ```text
