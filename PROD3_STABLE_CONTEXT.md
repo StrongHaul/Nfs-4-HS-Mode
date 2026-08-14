@@ -805,3 +805,17 @@ selector is disabled, the original modulo-three camera cycle is preserved.
 Split-screen player 2 also retains the stock cycle.
 
 The hook code is stored at `0x80054CAC`.
+## Stable point: selectable traffic speed
+
+Stable point confirmed by the user on 2026-08-14.
+
+```text
+NFS4.EXE  2AAD4B78D00BFD6A908F8819EF0C650D
+NFS 4.cht F0AD5604897F9D62A5F46A1F86A619BB
+```
+
+`[Мои\Повышенная скорость трафика]` provides stock, 100, 150, 200,
+230, and 250 km/h options. The cheat writes only the speed value at
+`8011F23C`; a permanent guarded hook in `NFS4.EXE` preserves the traffic
+direction and uses the original game result when the selected value is zero.
+The selector load includes the required PS1 MIPS load-delay instruction.
