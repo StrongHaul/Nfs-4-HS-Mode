@@ -16,7 +16,7 @@ MASS_CAVE_LEN = 0x70
 
 AIRACE_LIST_LOW = 0x0D30
 AIRACE_COUNT_LOW = 0xDAF8
-TON1_TRUCK_COLLISION_MASS_UNITS = 1172  # runtime mass = units << 10; 1172 ~= 1,200,000
+TON1_TRUCK_COLLISION_MASS_UNITS = 0  # zero keeps each AI racer's calculated stock mass
 
 REG = {
     "zero": 0,
@@ -147,6 +147,8 @@ def mass_cave() -> bytes:
         beq("t0", "zero", "normal"),
         nop(),
         ori("t0", "zero", TON1_TRUCK_COLLISION_MASS_UNITS),
+        beq("t0", "zero", "normal"),
+        nop(),
         sll("t0", "t0", 10),
         sw("t0", 0x00B8, "s0"),
         j(MASS_RETURN_ADDR),
@@ -197,7 +199,7 @@ def main() -> int:
 
     print(f"patched {exe}")
     print(
-        f"AI racer collision mass = option units {TON1_TRUCK_COLLISION_MASS_UNITS} << 10, "
+        "AI racer collision mass selector defaults to stock mass (zero); nonzero option units are shifted << 10, "
         "gated by AIRace runtime flag car+0x260 & 0x0008"
     )
     print("player heavy multiplier restored to stable x1.5")

@@ -819,3 +819,22 @@ NFS 4.cht F0AD5604897F9D62A5F46A1F86A619BB
 `8011F23C`; a permanent guarded hook in `NFS4.EXE` preserves the traffic
 direction and uses the original game result when the selected value is zero.
 The selector load includes the required PS1 MIPS load-delay instruction.
+## Stable point: AI collision-mass presets and extended physics distance
+
+Stable point confirmed by the user on 2026-08-15.
+
+```text
+NFS4.EXE  C0B413D85A8A106264674FAD61949348
+NFS 4.cht 9FD358281EC4C689E77B25F659DE04FA
+```
+
+`[Мои\Масса ИИ гонщиков]` uses selector `8011F240`. The `Стандартная`
+option writes zero to `80055450`; the guarded mass hook then preserves the
+mass calculated for the AI racer's own model. Available fixed collision-mass
+presets are Traffic No.16 `1088`, AI Cop Corvette `1135`, AI Cop Porsche 911
+`1156`, AI Cop Diablo SV `1215`, AI Cop BMW M5 `1384`, AI Cop Caprice `1398`,
+Big Truck No.1 `1600`, and Traffic No.20 `1600`.
+
+`[Мои\Дальность полной физики ИИ]` now provides stock, 200, 300, 400, 500,
+750, 1000, 1500, 2000, and 2500 metre full-physics distance options. Each
+option also writes the corresponding farther partial-processing threshold.
