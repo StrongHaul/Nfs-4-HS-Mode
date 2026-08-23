@@ -862,3 +862,25 @@ the original calculated speed. The existing stock, 100, 150, 200, 230, and
 Most traffic models regained normal road grip. Three still-unidentified
 traffic models can still slide and are intentionally left for later analysis;
 no model-specific physics workaround is included in this stable point.
+
+## Stable point: safe stock-unit loading
+
+Stable point confirmed by the user on 2026-08-24.
+
+```text
+NFS4.EXE  0F283AEB3CF4585AD4041163018E52A0
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+ZDUSTY.VIV C854C498933FDE8B18AC417EEB0601C9
+NFS 4.cht 30EBCD445807D806929C48A7218CE519
+```
+
+The AI-racer collision-mass hook now validates the race-car count before
+walking the runtime car list and handles the PS1 MIPS load delay correctly.
+Test Drive on Kindian Park and Single Race load with unit replacement cheats
+disabled, and the game also starts with all DuckStation cheats disabled.
+
+DuckStation can still report non-fatal reads from `0x0340xxxx` at
+`0x800BC8F8`/`0xBFC02B68`. They currently do not prevent loading or gameplay
+and are retained as a known issue for later investigation. `ZDUSTY.VIV` is
+the original 30-entry Hypercycle archive; the unsuccessful 31-entry F50
+experiment is not part of this stable point.

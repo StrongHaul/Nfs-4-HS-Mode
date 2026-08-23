@@ -89,6 +89,10 @@ def sra(rd: str, rt: str, shamt: int) -> int:
     return ins_r(0, REG[rt], REG[rd], shamt, 0x03)
 
 
+def sltiu(rt: str, rs: str, imm: int) -> int:
+    return ins_i(0x0B, REG[rs], REG[rt], imm)
+
+
 def beq(rs: str, rt: str, target: str) -> tuple[str, str, str, str]:
     return ("beq", rs, rt, target)
 
@@ -125,18 +129,18 @@ def mass_cave() -> bytes:
     items: list[int | str | tuple[str, str, str, str]] = [
         sw("a2", 0x00B8, "s0"),
         lui("t0", 0x8011),
-        addiu("t0", "t0", AIRACE_LIST_LOW),
         lui("t1", 0x8014),
         lw("t1", AIRACE_COUNT_LOW, "t1"),
-        beq("t1", "zero", "normal"),
         nop(),
-        "loop",
-        lw("t2", 0x0000, "t0"),
-        addiu("t0", "t0", 4),
-        beq("t2", "s0", "maybe_heavy"),
         addiu("t1", "t1", -1),
+        sltiu("t2", "t1", 8),
+        beq("t2", "zero", "normal"),
+        "loop",
+        lw("t2", AIRACE_LIST_LOW, "t0"),
+        beq("t2", "s0", "maybe_heavy"),
+        addiu("t0", "t0", 4),
         bne("t1", "zero", "loop"),
-        nop(),
+        addiu("t1", "t1", -1),
         "normal",
         j(MASS_RETURN_ADDR),
         nop(),
