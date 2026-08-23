@@ -838,3 +838,27 @@ Big Truck No.1 `1600`, and Traffic No.20 `1600`.
 `[Мои\Дальность полной физики ИИ]` now provides stock, 200, 300, 400, 500,
 750, 1000, 1500, 2000, and 2500 metre full-physics distance options. Each
 option also writes the corresponding farther partial-processing threshold.
+
+## Stable point: traffic speed without handling corruption
+
+Stable point confirmed by the user on 2026-08-23.
+
+```text
+NFS4.EXE  F31DB16E954F5D1CE8DF063CC2B66058
+FRONT.BIN 83ECFCE7A1656659A6A2E8338F50BA6B
+NFS 4.cht 30EBCD445807D806929C48A7218CE519
+```
+
+The selectable traffic-speed hook no longer writes `desiredSpeed` or
+`originalDesiredSpeed`. Those fields also affected vehicle orientation and
+caused many traffic models to slide. The old hook site at `0x8006F668` is
+restored to its original instructions.
+
+The replacement hook at `0x8006F4E8` changes only the final positive traffic
+speed immediately before the stock direction multiplier. Selector zero uses
+the original calculated speed. The existing stock, 100, 150, 200, 230, and
+250 km/h options remain unchanged and were confirmed working.
+
+Most traffic models regained normal road grip. Three still-unidentified
+traffic models can still slide and are intentionally left for later analysis;
+no model-specific physics workaround is included in this stable point.
