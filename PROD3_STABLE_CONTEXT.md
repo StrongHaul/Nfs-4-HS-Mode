@@ -884,3 +884,17 @@ DuckStation can still report non-fatal reads from `0x0340xxxx` at
 and are retained as a known issue for later investigation. `ZDUSTY.VIV` is
 the original 30-entry Hypercycle archive; the unsuccessful 31-entry F50
 experiment is not part of this stable point.
+
+## Stable point: updated traffic model descriptions
+
+Stable point confirmed by the user on 2026-08-25.
+
+```text
+NFS4.EXE  0F283AEB3CF4585AD4041163018E52A0
+NFS 4.cht 116147506294AA42DC62A94E2C205294
+```
+
+Only the visible traffic-model descriptions in the unit-selection cheats
+were updated. Cheat addresses, option values, and game code are unchanged.
+Traffic models `1D`, `1F`, `22`, and `23` are confirmed to slide even with
+the standard traffic-speed option; this remains a known model-specific issue.
