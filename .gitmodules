@@ -1,0 +1,3 @@
+[submodule "references/NFSHS-PSX-decomp"]
+	path = references/NFSHS-PSX-decomp
+	url = https://github.com/Caesar0007/NFSHS-PSX-decomp.git
