@@ -14,8 +14,6 @@ DEFAULT_EXE_GLOB = "PROD 3*/NFS4.EXE"
 MASS_RETURN_ADDR = 0x800A2750
 MASS_CAVE_LEN = 0x70
 
-AIRACE_LIST_LOW = 0x0D30
-AIRACE_COUNT_LOW = 0xDAF8
 TON1_TRUCK_COLLISION_MASS_UNITS = 0  # zero keeps each AI racer's calculated stock mass
 
 REG = {
@@ -128,33 +126,32 @@ def mass_cave() -> bytes:
     pc = runtime(MASS_CAVE_OFF)
     items: list[int | str | tuple[str, str, str, str]] = [
         sw("a2", 0x00B8, "s0"),
-        lui("t0", 0x8011),
-        lui("t1", 0x8014),
-        lw("t1", AIRACE_COUNT_LOW, "t1"),
+        lw("t0", 0x0288, "s0"),
         nop(),
-        addiu("t1", "t1", -1),
-        sltiu("t2", "t1", 8),
-        beq("t2", "zero", "normal"),
-        "loop",
-        lw("t2", AIRACE_LIST_LOW, "t0"),
-        beq("t2", "s0", "maybe_heavy"),
-        addiu("t0", "t0", 4),
-        bne("t1", "zero", "loop"),
-        addiu("t1", "t1", -1),
-        "normal",
-        j(MASS_RETURN_ADDR),
+        lw("t0", 0x0004, "t0"),
         nop(),
-        "maybe_heavy",
-        lw("t0", 0x0260, "s0"),
-        nop(),
-        andi("t0", "t0", 0x0008),
+        andi("t0", "t0", 0x0002),
         beq("t0", "zero", "normal"),
+        nop(),
+        # Keep the live selector at its established cheat address 0x80055450.
+        nop(),
+        nop(),
+        nop(),
+        nop(),
+        nop(),
+        nop(),
+        nop(),
+        nop(),
+        nop(),
+        nop(),
+        nop(),
         nop(),
         ori("t0", "zero", TON1_TRUCK_COLLISION_MASS_UNITS),
         beq("t0", "zero", "normal"),
         nop(),
         sll("t0", "t0", 10),
         sw("t0", 0x00B8, "s0"),
+        "normal",
         j(MASS_RETURN_ADDR),
         nop(),
     ]
@@ -204,7 +201,7 @@ def main() -> int:
     print(f"patched {exe}")
     print(
         "AI racer collision mass selector defaults to stock mass (zero); nonzero option units are shifted << 10, "
-        "gated by AIRace runtime flag car+0x260 & 0x0008"
+        "gated by carInfo->carClass & 2"
     )
     print("player heavy multiplier restored to stable x1.5")
     print(f"md5 {hashlib.md5(data).hexdigest()}")

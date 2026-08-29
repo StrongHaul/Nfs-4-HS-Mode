@@ -916,3 +916,20 @@ Hot Pursuit races comparable to the normal track direction without changing
 the configured police count or spawn probability.
 
 Patch script: `patch_prod3_reverse_hp_cop_spawn_direction.py`.
+
+## Stable point: shared unit 4 AI-racer collision mass
+
+Stable point confirmed by the user on 2026-08-30.
+
+```text
+NFS4.EXE  B079C006D6D8ABBF4256B598DBBE7299
+NFS 4.cht 116147506294AA42DC62A94E2C205294
+```
+
+The collision-mass selector at `80055450` now identifies AI racers through
+the authoritative `carInfo->carClass & 2` role bit. This makes the selected
+mass apply to `Unit 4. Cop / AI racer` when that shared slot is an AI racer,
+while excluding the same slot in its police role and excluding traffic.
+The established cheat address and mass option values are unchanged.
+
+Patch script: `patch_prod3_ai_racer_mass_exclude_traffic.py`.
