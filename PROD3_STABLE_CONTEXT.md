@@ -898,3 +898,21 @@ Only the visible traffic-model descriptions in the unit-selection cheats
 were updated. Cheat addresses, option values, and game code are unchanged.
 Traffic models `1D`, `1F`, `22`, and `23` are confirmed to slide even with
 the standard traffic-speed option; this remains a known model-specific issue.
+
+## Stable point: reverse Hot Pursuit cop spawning
+
+Stable point confirmed by the user on 2026-08-30.
+
+```text
+NFS4.EXE  0B37B7CA2F287B7E25B6DABE2C181C6F
+NFS 4.cht 116147506294AA42DC62A94E2C205294
+```
+
+`AIHigh_Cop::CheckForNewTriggers` now determines the side on which to scan
+for the next police spawn trigger from the car's track direction at
+`carObj+0x554`, rather than from the sign of `currentSpeed` at
+`carObj+0x564`. This keeps police appearance frequency in reverse-direction
+Hot Pursuit races comparable to the normal track direction without changing
+the configured police count or spawn probability.
+
+Patch script: `patch_prod3_reverse_hp_cop_spawn_direction.py`.
