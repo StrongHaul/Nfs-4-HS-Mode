@@ -933,3 +933,23 @@ while excluding the same slot in its police role and excluding traffic.
 The established cheat address and mass option values are unchanged.
 
 Patch script: `patch_prod3_ai_racer_mass_exclude_traffic.py`.
+
+## Stable point: AI detention banner on the player HUD
+
+Stable point confirmed by the user on 2026-08-30.
+
+```text
+NFS4.EXE  B079C006D6D8ABBF4256B598DBBE7299
+NFS 4.cht 573B5D9025B851B0B27471C789370762
+```
+
+The `Я могу арестовать гонщиков` cheat now routes the stock warning,
+ticket, and arrest banner to the player's HUD while enabled. The same cheat
+restores the original AI car-index instructions while disabled, so the banner
+does not appear for AI detentions when the feature is off. The stock banner
+shutdown path is routed in the same way, preventing the overlay from remaining
+on screen after the detention finishes.
+
+No executable HUD hook or speech hook is used. The stable `NFS4.EXE` remains
+unchanged; the routing is performed by conditional Gameshark writes in
+`NFS 4.cht` controlled by `800F7A00 000?`.
