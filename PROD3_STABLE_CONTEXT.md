@@ -970,3 +970,20 @@ the initialized police top speed while retaining the selected civilian model.
 The implementation is entirely inline and does not use a runtime code cave.
 
 Patch script: `patch_prod3_civilian_ai_cop_tuning_fallback.py`.
+
+## Stable point: siren audio for civilian AI cop replacements
+
+Stable point confirmed by the user on 2026-08-30.
+
+```text
+NFS4.EXE  35E280C3F3BFA8A05E93FDB620CE004B
+NFS 4.cht 573B5D9025B851B0B27471C789370762
+```
+
+Nearby AI cops using civilian replacement models now pass the spatial siren
+audio gate through the authoritative `carFlags & 0x20` AI-cop role bit. The
+change is independent of the player civilian-lights cheat at `8011F208` and
+does not enter any police renderer or nighttime-facet path. Existing correct
+nighttime beacon illumination on civilian AI cops is left unchanged.
+
+Patch script: `patch_prod3_civilian_ai_cop_siren.py`.
