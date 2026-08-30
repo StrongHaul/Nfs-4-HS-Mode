@@ -953,3 +953,20 @@ on screen after the detention finishes.
 No executable HUD hook or speech hook is used. The stable `NFS4.EXE` remains
 unchanged; the routing is performed by conditional Gameshark writes in
 `NFS 4.cht` controlled by `800F7A00 000?`.
+
+## Stable point: civilian replacement cars for AI cops
+
+Stable point confirmed by the user on 2026-08-30.
+
+```text
+NFS4.EXE  46D5E22001313A6A86D3B5BFBD75B8C5
+NFS 4.cht 573B5D9025B851B0B27471C789370762
+```
+
+AI cops using civilian replacement models now use the safe Diablo Cop tuning
+entry instead of indexing outside the six-entry police tuning table. Civilian
+cop cars also receive `topSpeedUpgradeMult = 1.3`, allowing them to approach
+the initialized police top speed while retaining the selected civilian model.
+The implementation is entirely inline and does not use a runtime code cave.
+
+Patch script: `patch_prod3_civilian_ai_cop_tuning_fallback.py`.
