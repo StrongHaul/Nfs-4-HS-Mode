@@ -988,13 +988,13 @@ nighttime beacon illumination on civilian AI cops is left unchanged.
 
 Patch script: `patch_prod3_civilian_ai_cop_siren.py`.
 
-## Experimental checkpoint: stock police-light renderer for civilian AI cops
+## Stable point: daytime flashing for civilian AI cops
 
-Experimental checkpoint saved on 2026-09-09. This is not the primary stable
-build because nighttime rendering still produces invalid reads.
+Stable point confirmed by the user on 2026-09-12. Nighttime rendering remains
+a known issue, but this checkpoint preserves the accepted daytime progress.
 
 ```text
-NFS4.EXE  C1691CD3CDC42402399C4C418DB28CFD
+NFS4.EXE  65FC7C19695170C9BCE7331A310BEAE0
 stable base 35E280C3F3BFA8A05E93FDB620CE004B
 ```
 
@@ -1002,18 +1002,24 @@ stable base 35E280C3F3BFA8A05E93FDB620CE004B
 `carFlags & 0x20` instead of restricting it to model IDs `0x16..0x1B`.
 This lets civilian AI-cop replacements enter the stock police-light branch.
 
-Observed behavior:
+The isolated strobe dispatcher additionally filters non-player cars by both
+the civilian model range and exact identity in `Cars_gCopCarList`. Civilian AI
+cops derive their flashing phase from the game timer and bypass the player's
+counter increment/write, preventing proximity from accelerating the cadence.
+Player cars, AI racers, traffic, and stock police models remain outside this
+isolated path.
 
-- all tested civilian AI cops show some flashing;
-- turn signals flash with the stock single cadence;
-- white rear lights use the existing double cadence;
-- headlights remain continuously on;
-- rear red lights remain off or do not flash;
+Accepted observed behavior:
+
+- civilian AI-cop headlights, rear lights, white rear lights, and turn signals
+  flash with the intended player-style daytime pattern;
+- the right turn signal does not yet reproduce the double cadence perfectly;
 - stock police cars continue to behave normally;
 - nighttime civilian-cop lighting is chaotic and repeatedly reads
   `0xFFFFFFFF` at `PC=0x800C6CE0/0x800C6CE8`;
 - related invalid scratchpad reads were observed at `PC=0x800DC44C`.
 
-Patch script:
-`patch_prod3_all_ai_cops_use_stock_light_renderer_test.py`.
-Run it with `--revert` to restore the stable base executable.
+Patch scripts:
+
+- `patch_prod3_all_ai_cops_use_stock_light_renderer_test.py`;
+- `patch_prod3_civilian_ai_cop_strobe_isolated.py`.
