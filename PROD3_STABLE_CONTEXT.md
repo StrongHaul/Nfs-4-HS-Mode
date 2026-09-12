@@ -1093,3 +1093,23 @@ Additional patch scripts:
 
 The previously documented nighttime civilian-cop illumination issue remains
 deferred and is not part of this stable daytime checkpoint.
+
+## Stable point: civilian AI-cop night beacon source filter
+
+Confirmed by the user on 2026-09-12.
+
+```text
+NFS4.EXE  902C9AFA835A9BB8B6714F5AC8EF08A8
+NFS 4.cht 4ACBA75701E0A23BFB38970E706EAC10
+previous stable EXE 45C66058338BDB9F2F7A583C88CD2F8B
+```
+
+The night beacon-source selection in `SetupBuildMatrices` now skips AI-cop
+cars whose model ID is outside the stock police range `0x16..0x1B`. The
+confirmed daytime civilian AI-cop flashing, white rear lights, and normal
+police-car lighting remain intact. The user reports no night-render errors in
+the tested tracks. A red roof-beacon glow is still visible on civilian AI
+cops at night; this remaining visual artifact is accepted for this stable
+checkpoint and must not be described as fully disabled.
+
+Patch script: `patch_prod3_skip_civilian_ai_cop_night_beacon.py`.
