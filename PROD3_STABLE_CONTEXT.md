@@ -1053,3 +1053,43 @@ Additional patch scripts used by this candidate:
 - `patch_prod3_civilian_ai_cop_right_indicator_mirror_left.py`;
 - `patch_prod3_civilian_ai_cop_right_indicator_pause.py`;
 - `patch_prod3_civilian_ai_cop_right_indicator_pause_v2.py`.
+
+## Stable point: complete daytime lights for civilian AI cops
+
+Stable point confirmed by the user on 2026-09-12. This supersedes the
+preceding candidate checkpoint.
+
+```text
+NFS4.EXE  45C66058338BDB9F2F7A583C88CD2F8B
+NFS 4.cht 4ACBA75701E0A23BFB38970E706EAC10
+candidate base A3B6A4341CCE27A09D24F0719057B67A
+```
+
+Confirmed behavior:
+
+- all intended daytime elements on civilian AI cops flash with the accepted
+  double-pulse and alternating indicator cadence;
+- the player using a stock police model retains the stock roof beacons and
+  normal police lighting when the siren is active;
+- civilian AI-cop white rear lights use the game timer and no longer depend on
+  the player's selected model or on cheat `8011F208`;
+- `8011F208` remains limited to the civilian player-car light/siren feature;
+- stock AI police lighting remains unchanged.
+
+Implementation notes:
+
+- the police renderer now combines the stock model range `0x16..0x1B` with
+  the authoritative AI-cop role bit instead of replacing the model test;
+- the DrawC police-light gate separately accepts civilian AI cops and only
+  accepts a civilian player car while `8011F208` is enabled;
+- the reverse-light phase dispatcher routes civilian AI cops to the game timer
+  and preserves the existing player-only helper for the player car.
+
+Additional patch scripts:
+
+- `patch_prod3_cop_renderer_model_or_ai_role.py`;
+- `patch_prod3_civilian_cop_draw_gate.py`;
+- `patch_prod3_civilian_ai_cop_reverse_phase.py`.
+
+The previously documented nighttime civilian-cop illumination issue remains
+deferred and is not part of this stable daytime checkpoint.
