@@ -1023,3 +1023,33 @@ Patch scripts:
 
 - `patch_prod3_all_ai_cops_use_stock_light_renderer_test.py`;
 - `patch_prod3_civilian_ai_cop_strobe_isolated.py`.
+
+## Stable candidate: corrected civilian AI-cop daytime indicator cadence
+
+Candidate recorded on 2026-09-12. This is a preserved test candidate, not yet
+the accepted stable build.
+
+```text
+NFS4.EXE  A3B6A4341CCE27A09D24F0719057B67A
+stable base 65FC7C19695170C9BCE7331A310BEAE0
+```
+
+The right turn signal of civilian AI cops now completes the same double pulse
+as the left signal and is cleared only when the alternating left phase begins.
+The user confirmed that all intended daytime elements now flash correctly on
+civilian AI cops.
+
+Known candidate regressions that must be fixed before promotion to stable:
+
+- a player using a stock police model loses the stock roof beacons;
+- activating the siren on that player police car suppresses all its light
+  elements, independently of the `8011F208` civilian-player light cheat;
+- civilian AI-cop white rear lights incorrectly depend on `8011F208` and stop
+  flashing when the player uses a police model;
+- nighttime civilian AI-cop illumination remains deferred.
+
+Additional patch scripts used by this candidate:
+
+- `patch_prod3_civilian_ai_cop_right_indicator_mirror_left.py`;
+- `patch_prod3_civilian_ai_cop_right_indicator_pause.py`;
+- `patch_prod3_civilian_ai_cop_right_indicator_pause_v2.py`.
