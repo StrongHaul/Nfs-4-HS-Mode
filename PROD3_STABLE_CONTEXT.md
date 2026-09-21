@@ -1021,8 +1021,10 @@ Accepted observed behavior:
 
 Patch scripts:
 
-- `patch_prod3_all_ai_cops_use_stock_light_renderer_test.py`;
 - `patch_prod3_civilian_ai_cop_strobe_isolated.py`.
+
+The superseded stock-renderer diagnostic script is retained in Git history,
+not in the current working tree.
 
 ## Stable candidate: corrected civilian AI-cop daytime indicator cadence
 
